@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../constants.dart';
 
+
 class IncreaseCapacityScreen extends StatefulWidget {
   const IncreaseCapacityScreen({super.key});
 
@@ -15,6 +16,32 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
 
   String dropdownValue = 'Variant';
   List<String> options = ['Variant', 'Option 2', 'Option 3'];
+  DateTime selectedDate = DateTime.now();
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _dateController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+  }
+
+
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime(2015),
+        lastDate: DateTime(2101));
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,9 +224,14 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
+                                  onTap: (){
+                                    _selectDate(context);
+                                  },
+                                  readOnly: true,
+                                  controller: _dateController,
                                   keyboardType: TextInputType.datetime,
                                   decoration: InputDecoration(
-                                    labelText: "SEARCH PALLET",
+                                    labelText: "",
                                     labelStyle:
                                         const TextStyle(color: Colors.black),
                                     contentPadding:
