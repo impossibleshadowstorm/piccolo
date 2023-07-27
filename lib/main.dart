@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_create_pallet_screen.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_manage_screen.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_order_screen.dart';
 import 'package:piccolo/screens/pallet_management/choose_sku_screen.dart';
 import 'package:piccolo/screens/pallet_management/increase_capacity_screen.dart';
 import 'package:piccolo/screens/reach_truck/rt_glass.dart';
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: IncreaseCapacityScreen(),
+        home: const FinishedGoodsOrderScreen(),
       );
     });
   }

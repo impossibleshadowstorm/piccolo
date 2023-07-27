@@ -10,6 +10,12 @@ class IncreaseCapacityScreen extends StatefulWidget {
 }
 
 class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
+  String dropdownValue1 = 'SKU No.';
+  List<String> options1 = ['SKU No.', 'Option 2', 'Option 3'];
+
+  String dropdownValue = 'Variant';
+  List<String> options = ['Variant', 'Option 2', 'Option 3'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,24 +154,38 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           children: [
                             Expanded(
                               child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0.w,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
+                                  borderRadius: BorderRadius.circular(1.0.w),
                                 ),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "SKU NO.",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                    suffixIcon: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.black87,
-                                      size: 20.sp,
-                                    ),
+                                child: DropdownButton(
+                                  isExpanded: true,
+                                  value: dropdownValue1,
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    size: 20.0.sp,
                                   ),
+                                  underline: const SizedBox(),
+                                  iconSize: 24,
+                                  elevation: 16,
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 18.0.sp),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      dropdownValue1 = newValue!;
+                                    });
+                                  },
+                                  items: options1
+                                      .map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             ),
@@ -201,24 +221,38 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           children: [
                             Expanded(
                               child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0.w,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
+                                  borderRadius: BorderRadius.circular(1.0.w),
                                 ),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "VARIANT",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                    suffixIcon: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.black87,
-                                      size: 20.sp,
-                                    ),
+                                child: DropdownButton(
+                                  isExpanded: true,
+                                  value: dropdownValue,
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    size: 20.0.sp,
                                   ),
+                                  underline: const SizedBox(),
+                                  iconSize: 24,
+                                  elevation: 16,
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 18.0.sp),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      dropdownValue = newValue!;
+                                    });
+                                  },
+                                  items: options
+                                      .map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             ),
