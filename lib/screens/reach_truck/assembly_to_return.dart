@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:line_icons/line_icon.dart';
 import 'package:piccolo/constants.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class RTGlass extends StatefulWidget {
-  const RTGlass({super.key});
+class AssemblyToReturn extends StatefulWidget {
+  const AssemblyToReturn({super.key});
 
   @override
-  State<RTGlass> createState() => _RTGlassState();
+  State<AssemblyToReturn> createState() => _AssemblyToReturnState();
 }
 
-class _RTGlassState extends State<RTGlass> {
-  String dropdownValue = 'Option 1';
-  List<String> options = ['Option 1', 'Option 2', 'Option 3'];
+class _AssemblyToReturnState extends State<AssemblyToReturn> {
+  bool buttonPressed = false;
+  String dropdownValue = 'LINE 1';
+  List<String> options = ['LINE 1', 'LINE 2', 'LINE 3'];
   String? selectedPalletNo;
   String? selectedDrop;
   List<String> palletItems = ["Pallet No. 1", "Pallet No. 2", "Pallet No. 3"];
@@ -25,22 +27,25 @@ class _RTGlassState extends State<RTGlass> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "GLASS",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0.sp,
-                  fontWeight: FontWeight.w400),
+            Expanded(
+              child: Text(
+                "ASSEMBLY TO RETURN WH",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0.sp,
+                    fontWeight: FontWeight.w300),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             Row(
               children: [
-                Text(
-                  "Back",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0.sp,
-                      fontWeight: FontWeight.w400),
-                ),
+                // Text(
+                //   "Back",
+                //   style: TextStyle(
+                //       color: Colors.white,
+                //       fontSize: 18.0.sp,
+                //       fontWeight: FontWeight.w400),
+                // ),
                 SizedBox(
                   width: 2.0.w,
                 ),
@@ -106,17 +111,17 @@ class _RTGlassState extends State<RTGlass> {
             Container(
               margin: EdgeInsets.symmetric(vertical: 1.0.h),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
                     child: Text(
-                      "CHOOSE PALLET AND SCAN TO CONFIRM OR SCAN DIRECTLY",
+                      "OR",
                       overflow: TextOverflow.visible,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
-                          fontSize: 13.0.sp,
+                          fontSize: 18.0.sp,
                           fontWeight: FontWeight.w400),
                     ),
                   ),
@@ -200,6 +205,12 @@ class _RTGlassState extends State<RTGlass> {
                 )
               ],
             ),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Constants.primaryOrangeColor,
+              margin: EdgeInsets.symmetric(vertical: 1.5.h),
+            ),
             Row(
               children: [
                 Expanded(
@@ -278,15 +289,33 @@ class _RTGlassState extends State<RTGlass> {
               ],
             ),
             Container(
-              height: 1,
+              padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 0.5.h),
               width: double.infinity,
-              color: Constants.primaryOrangeColor,
-              margin: EdgeInsets.symmetric(vertical: 2.h),
+              margin: EdgeInsets.symmetric(vertical: 1.0.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Text(
+                    "LAST LOCATION: GENERAL",
+                    overflow: TextOverflow.visible,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13.0.sp,
+                        fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
             ),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      buttonPressed = !buttonPressed;
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0.w)),
@@ -299,21 +328,70 @@ class _RTGlassState extends State<RTGlass> {
                         fontWeight: FontWeight.w400),
                   )),
             ),
-            selectedPalletNo == "Pallet No. 1"
+            buttonPressed
                 ? Container(
                     width: double.infinity,
                     margin: EdgeInsets.symmetric(vertical: 3.0.h),
                     padding: EdgeInsets.symmetric(
                         vertical: 3.0.h, horizontal: 5.0.w),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(1.0.w),
-                        border: Border.all(color: Colors.red)),
-                    child: Text(
-                      "ALERT: WRONG PALLET SELECTED",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.0.sp,
-                          fontWeight: FontWeight.w400),
+                        borderRadius: BorderRadius.circular(2.0.w),
+                        border: Border.all(color: Colors.green)),
+                    child: Row(
+                      children: [
+                        LineIcon.checkCircle(
+                          color: Colors.green,
+                          size: 20.0.sp,
+                        ),
+                        SizedBox(
+                          width: 3.0.w,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "PALLET UPDATE SUCCESSFULLY",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 16.0.sp,
+                                          fontWeight: FontWeight.w200),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "PALLET NO: P005",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 16.0.sp,
+                                    fontWeight: FontWeight.w200),
+                              ),
+                              Text(
+                                "ROM LINE: 01",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 16.0.sp,
+                                    fontWeight: FontWeight.w200),
+                              ),
+                              Text(
+                                "TO WH: GENERAL",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 16.0.sp,
+                                    fontWeight: FontWeight.w200),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : const SizedBox()
