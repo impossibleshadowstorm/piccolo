@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:piccolo/common/widgets/buttons.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/screens/pallet_management/manage_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -107,7 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         SizedBox(height: 3.h),
-                        CommonButtons.primaryOrangeFilledButton("Login", null)
+                        InkWell(
+                            onTap:(){
+                              Get.to(() => const ManageScreen());
+                            },child: CommonButtons.primaryOrangeFilledButton("Login", null))
                       ],
                     ),
                     SizedBox(height: 10.h),

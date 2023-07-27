@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:piccolo/common/widgets/buttons.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../constants.dart';
@@ -75,7 +74,6 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                             borderRadius: BorderRadius.circular(1.w),
                           ),
                           child: TextFormField(
-                            obscureText: true,
                             decoration: InputDecoration(
                               labelText: "SEARCH LOCATION",
                               labelStyle: const TextStyle(color: Colors.black),
@@ -100,7 +98,6 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "SEARCH PALLET",
                                     labelStyle:

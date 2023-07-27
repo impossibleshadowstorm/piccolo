@@ -73,7 +73,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             borderRadius: BorderRadius.circular(1.w),
                           ),
                           child: TextFormField(
-                            obscureText: true,
                             decoration: InputDecoration(
                               labelText: "SEARCH LOCATION",
                               labelStyle: const TextStyle(color: Colors.black),
@@ -98,7 +97,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "SEARCH PALLET",
                                     labelStyle:
@@ -155,7 +153,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "SKU NO.",
                                     labelStyle:
@@ -181,7 +178,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                 ),
                                 child: TextFormField(
                                   keyboardType: TextInputType.datetime,
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "SEARCH PALLET",
                                     labelStyle:
@@ -210,7 +206,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "VARIANT",
                                     labelStyle:
@@ -235,7 +230,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   borderRadius: BorderRadius.circular(1.w),
                                 ),
                                 child: TextFormField(
-                                  obscureText: true,
                                   decoration: InputDecoration(
                                     labelText: "TYPE WEIGHT",
                                     labelStyle:
@@ -403,7 +397,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
               Container(
                 height: 30,
                 width: 22.5.w,
-                padding: EdgeInsets.symmetric( horizontal: 5.w),
+                padding: EdgeInsets.symmetric(horizontal: 5.w),
                 decoration: BoxDecoration(
                   color: Colors.green,
                   borderRadius: BorderRadius.circular(1.w),
@@ -424,7 +418,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
               Container(
                 height: 30,
                 width: 22.5.w,
-                padding: EdgeInsets.symmetric( horizontal: 5.w),
+                padding: EdgeInsets.symmetric(horizontal: 5.w),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(1.w),
@@ -442,7 +436,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                   ),
                 ),
               ),
-
             ],
           ),
         ],

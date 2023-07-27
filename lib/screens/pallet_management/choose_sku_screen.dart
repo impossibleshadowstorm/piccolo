@@ -10,6 +10,8 @@ class ChooseSKUScreen extends StatefulWidget {
 }
 
 class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
+  int selected = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,6 +28,7 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
               width: 100.w,
               decoration: const BoxDecoration(color: Colors.transparent),
               child: TextFormField(
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: "Choose or Type Varient",
                   labelStyle: TextStyle(
@@ -62,17 +65,26 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
   Widget chooseTile(int index) {
     return Column(
       children: [
-        Container(
-          // height: 40,
-          padding: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 2.5.w),
-          width: 100.w,
-          color: index == 2 ? Constants.primaryOrangeColor : Colors.transparent,
-          child: Text(
-            "ABC TEST",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18.sp,
+        InkWell(
+          onTap: () {
+            setState(() {
+              selected = index;
+            });
+          },
+          child: Container(
+            // height: 40,
+            padding: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 2.5.w),
+            width: 100.w,
+            color: index == selected
+                ? Constants.primaryOrangeColor
+                : Colors.transparent,
+            child: Text(
+              "ABC TEST",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.sp,
+              ),
             ),
           ),
         ),

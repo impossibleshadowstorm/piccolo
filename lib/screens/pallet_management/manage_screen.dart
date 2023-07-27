@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/screens/pallet_management/increase_capacity_screen.dart';
+import 'package:piccolo/screens/pallet_management/sku_return_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../common/widgets/buttons.dart';
@@ -45,11 +48,21 @@ class _ManageScreenState extends State<ManageScreen> {
                   children: [
                     SizedBox(height: 10.h),
                     SizedBox(height: 3.h),
-                    CommonButtons.primaryOrangeFilledButton(
-                        "Return Pallet", null),
+                    InkWell(
+                      onTap: (){
+                        Get.to(() => const SKUReturnScreen());
+                      },
+                      child: CommonButtons.primaryOrangeFilledButton(
+                          "Return Pallet", null),
+                    ),
                     SizedBox(height: 3.h),
-                    CommonButtons.primaryOrangeFilledButton(
-                        "Create Pallet", null),
+                    InkWell(
+                      onTap: (){
+                        Get.to(() => const IncreaseCapacityScreen());
+                      },
+                      child: CommonButtons.primaryOrangeFilledButton(
+                          "Create Pallet", null),
+                    ),
                   ],
                 ),
               ),
