@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:piccolo/screens/pallet_management/login_screen.dart';
+import 'package:piccolo/screens/pallet_management/choose_sku_screen.dart';
+import 'package:piccolo/screens/pallet_management/increase_capacity_screen.dart';
+import 'package:piccolo/screens/reach_truck/rt_glass.dart';
+import 'package:piccolo/screens/reach_truck/rt_jobs_pending.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 void main() {
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const LoginScreen(),
+        home: IncreaseCapacityScreen(),
       );
     });
   }
