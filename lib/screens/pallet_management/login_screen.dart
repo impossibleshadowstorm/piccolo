@@ -1,9 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/common/widgets/buttons.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/screens/pallet_management/manage_screen.dart';
+import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:wc_form_validators/wc_form_validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +18,25 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+  final Webservices webservices = Webservices();
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,80 +67,120 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          "EXG",
-                          style: TextStyle(
-                            color: Constants.primaryOrangeColor,
-                            fontSize: 25.sp,
-                            fontWeight: FontWeight.bold,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            "EXG",
+                            style: TextStyle(
+                              color: Constants.primaryOrangeColor,
+                              fontSize: 25.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "ESSAS",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            "ESSAS",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    Column(
-                      children: [
-                        Text(
-                          "User Login",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w300,
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            "User Login",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 3.h),
-                        Container(
-                          width: 80.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(2.5.w),
+                          SizedBox(height: 3.h),
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 10.0.w),
+                            child: TextFormField(
+                              controller: email,
+                              validator: Validators.compose([
+                                Validators.email("Please enter valid email"),
+                                Validators.required("Please enter email")
+                              ]),
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              decoration: InputDecoration(
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  hintText: "Email",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.black),
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 5.w),
+                                  border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(3.0.w))),
+                            ),
                           ),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                                labelText: "USER ID",
-                                labelStyle: TextStyle(color: Colors.black),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 5.w),
-                                border: InputBorder.none),
+                          SizedBox(height: 3.h),
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 10.0.w),
+                            child: TextFormField(
+                              obscureText: true,
+                              controller: password,
+                              validator:
+                                  Validators.required("Please enter password"),
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              decoration: InputDecoration(
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  hintText: "Passowrd",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.black),
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 5.w),
+                                  border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(3.0.w))),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 3.h),
-                        Container(
-                          width: 80.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(2.5.w),
-                          ),
-                          child: TextFormField(
-                            obscureText: true,
-                            decoration: InputDecoration(
-                                labelText: "PASSWORD",
-                                labelStyle: TextStyle(color: Colors.black),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 5.w),
-                                border: InputBorder.none),
-                          ),
-                        ),
-                        SizedBox(height: 3.h),
-                        InkWell(
-                            onTap:(){
-                              Get.to(() => const ManageScreen());
-                            },child: CommonButtons.primaryOrangeFilledButton("Login", null))
-                      ],
-                    ),
-                    SizedBox(height: 10.h),
-                  ],
+                          SizedBox(height: 3.h),
+                          InkWell(
+                              onTap: () {
+                                if (_formKey.currentState!.validate()) {
+                                  CustomProgressDialog progressDialog =
+                                      CustomProgressDialog(
+                                    context,
+                                    blur: 10,
+                                    onDismiss: () =>
+                                        log("Do something onDismiss"),
+                                  );
+                                  progressDialog.show();
+                                  webservices
+                                      .loginUser(email.text, password.text)
+                                      .then((value) {
+                                    progressDialog.dismiss();
+                                    if (value != null) {
+                                      if (value.data?.role ==
+                                          "PALLET_CREATION") {
+                                        Get.offAll(() => const ManageScreen());
+                                      }
+                                    }
+                                  });
+                                }
+                              },
+                              child: CommonButtons.primaryOrangeFilledButton(
+                                  "Login", null))
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                    ],
+                  ),
                 ),
               ),
             ],

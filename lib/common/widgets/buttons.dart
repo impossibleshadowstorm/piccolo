@@ -17,7 +17,7 @@ class CommonButtons {
           buttonText,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20.sp,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w400,
           ),
         ),

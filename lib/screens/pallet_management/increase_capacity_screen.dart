@@ -1,7 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
-import '../../constants.dart';
+import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:get/get.dart';
+import 'package:piccolo/screens/pallet_management/choose_sku_screen.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:wc_form_validators/wc_form_validators.dart';
+import '../../common/widgets/DefaultBtn.dart';
+import '../../common/widgets/DefaultContainerButton.dart';
+import '../../common/widgets/ScanContainer.dart';
+import '../../constants.dart';
 
 class IncreaseCapacityScreen extends StatefulWidget {
   const IncreaseCapacityScreen({super.key});
@@ -11,34 +19,34 @@ class IncreaseCapacityScreen extends StatefulWidget {
 }
 
 class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
-  String dropdownValue1 = 'SKU No.';
-  List<String> options1 = ['SKU No.', 'Option 2', 'Option 3'];
-
-  String dropdownValue = 'Variant';
-  List<String> options = ['Variant', 'Option 2', 'Option 3'];
   DateTime selectedDate = DateTime.now();
-  final TextEditingController _dateController = TextEditingController();
+  String date = "";
+
+  final TextEditingController weight = TextEditingController();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _dateController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+    date = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
   }
 
+  @override
+  void dispose() {
+    weight.dispose();
+    super.dispose();
+  }
 
-
-  Future<Null> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
         initialDatePickerMode: DatePickerMode.day,
-        firstDate: DateTime(2015),
-        lastDate: DateTime(2101));
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2025));
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        _dateController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+        date = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
       });
     }
   }
@@ -47,51 +55,57 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Constants.primaryBackgroundColor,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20.0.sp,
+            )),
+        backgroundColor: Constants.primaryOrangeColor,
+        title: Text(
+          "Pallet Management",
+          style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.0.sp,
+              fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0.w),
+            child: Row(
+              children: [
+                Text(
+                  "Save",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17.0.sp,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 1.5.w,
+                ),
+                Icon(
+                  Icons.save_outlined,
+                  color: Colors.white,
+                  size: 22.sp,
+                )
+              ],
+            ),
+          )
+        ],
+      ),
       body: SafeArea(
         child: SizedBox(
           height: 100.h,
           width: 100.w,
           child: Column(
             children: [
-              Container(
-                height: AppBar().preferredSize.height + 15,
-                width: 100.w,
-                color: Constants.primaryOrangeColor,
-                padding: EdgeInsets.symmetric(horizontal: 5.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "PALLET MANAGEMENT",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 19.sp,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.1,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "Save",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w300,
-                            letterSpacing: 0.1,
-                          ),
-                        ),
-                        SizedBox(width: 2.5.w),
-                        Icon(
-                          Icons.save,
-                          color: Colors.white70,
-                          size: 25.sp,
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -99,74 +113,118 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                     child: Column(
                       children: [
                         SizedBox(height: 3.h),
-                        Container(
-                          width: 90.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(1.w),
-                          ),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: "SEARCH LOCATION",
-                              labelStyle: const TextStyle(color: Colors.black),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 5.w),
-                              border: InputBorder.none,
-                              suffixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black87,
-                                size: 20.sp,
-                              ),
-                            ),
-                          ),
+                        DefaultContainerButton(
+                          noIcon: false,
+                          icon: Icons.search,
+                          label: "Search Location",
+                          ontap: () {
+                            Get.to(() => const ChooseSKUScreen(
+                                  type: "Location",
+                                ));
+                          },
                         ),
                         SizedBox(height: 2.h),
                         Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "SEARCH PALLET",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
+                              child: DefaultContainerButton(
+                                noIcon: true,
+                                icon: Icons.search,
+                                label: "Search Pallet",
+                                ontap: () {
+                                  Get.to(() => const ChooseSKUScreen(
+                                        type: "Pallet",
+                                      ));
+                                },
                               ),
                             ),
                             SizedBox(width: 5.w),
                             Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 1.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(2.5.w),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "SCAN",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18.sp,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    SizedBox(width: 2.w),
-                                    Icon(
-                                      Icons.qr_code_scanner,
-                                      color: Colors.white70,
-                                      size: 20.sp,
-                                    ),
-                                  ],
+                              child: ScanContainer(
+                                onTap: () async {
+                                  String barcodeScanRes =
+                                      await FlutterBarcodeScanner.scanBarcode(
+                                          "#808080",
+                                          "Cancel",
+                                          true,
+                                          ScanMode.BARCODE);
+                                  log(barcodeScanRes, name: "BarCode Value");
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(
+                          height: 4.h,
+                          color: Constants.primaryOrangeColor,
+                          thickness: 2,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DefaultContainerButton(
+                                noIcon: false,
+                                icon: Icons.search,
+                                label: "SKU No.",
+                                ontap: () {
+                                  Get.to(() => const ChooseSKUScreen(
+                                        type: "SKU",
+                                      ));
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 5.w),
+                            Expanded(
+                              child: DefaultContainerButton(
+                                noIcon: false,
+                                icon: Icons.calendar_month,
+                                label: date,
+                                ontap: () {
+                                  _selectDate(context);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 2.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DefaultContainerButton(
+                                noIcon: false,
+                                icon: Icons.search,
+                                label: "Variant",
+                                ontap: () {
+                                  Get.to(() => const ChooseSKUScreen(
+                                        type: "Variant",
+                                      ));
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 5.w),
+                            Expanded(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: TextFormField(
+                                  keyboardType: TextInputType.number,
+                                  obscureText: false,
+                                  controller: weight,
+                                  validator:
+                                      Validators.required("weight missing!!"),
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                  decoration: InputDecoration(
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      hintText: "Weight",
+                                      hintStyle: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 17.0.sp),
+                                      contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 5.w),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(3.0.w))),
                                 ),
                               ),
                             ),
@@ -180,179 +238,18 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0.w,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.0.w),
-                                ),
-                                child: DropdownButton(
-                                  isExpanded: true,
-                                  value: dropdownValue1,
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 20.0.sp,
-                                  ),
-                                  underline: const SizedBox(),
-                                  iconSize: 24,
-                                  elevation: 16,
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 18.0.sp),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      dropdownValue1 = newValue!;
-                                    });
-                                  },
-                                  items: options1
-                                      .map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 5.w),
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: TextFormField(
-                                  onTap: (){
-                                    _selectDate(context);
-                                  },
-                                  readOnly: true,
-                                  controller: _dateController,
-                                  keyboardType: TextInputType.datetime,
-                                  decoration: InputDecoration(
-                                    labelText: "",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                    suffixIcon: Icon(
-                                      Icons.calendar_month,
-                                      color: Colors.black87,
-                                      size: 20.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 2.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0.w,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.0.w),
-                                ),
-                                child: DropdownButton(
-                                  isExpanded: true,
-                                  value: dropdownValue,
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 20.0.sp,
-                                  ),
-                                  underline: const SizedBox(),
-                                  iconSize: 24,
-                                  elevation: 16,
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 18.0.sp),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      dropdownValue = newValue!;
-                                    });
-                                  },
-                                  items: options
-                                      .map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 5.w),
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "TYPE WEIGHT",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          height: 4.h,
-                          color: Constants.primaryOrangeColor,
-                          thickness: 2,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 1.h),
-                                decoration: BoxDecoration(
-                                  color: Constants.primaryOrangeColor,
-                                  borderRadius: BorderRadius.circular(2.5.w),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Add",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
+                              child: DefaultBtn(
+                                kolor: Constants.primaryOrangeColor,
+                                label: "Add",
+                                onTap: () {},
                               ),
                             ),
                             SizedBox(width: 2.5.w),
                             Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 1.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(2.5.w),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Request WH",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
+                              child: DefaultBtn(
+                                kolor: Colors.green,
+                                label: "Request WH",
+                                onTap: () {},
                               ),
                             ),
                           ],
@@ -380,7 +277,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           ),
                         ),
                         SizedBox(height: 4.h),
-                        Container(
+                        SizedBox(
                           height: ((80 + 4.h) * 10) + 40,
                           child: ListView.builder(
                             padding: EdgeInsets.zero,
@@ -424,6 +321,16 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  "PALLET: P001",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
                 Text(
                   "SKU: AH556ZT",
                   maxLines: 1,
