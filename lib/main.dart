@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:piccolo/models/LoginModel.dart';
-import 'package:piccolo/screens/pallet_management/login_screen.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_create_pallet_screen.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_manage_screen.dart';
+import 'package:piccolo/screens/finished_goods/finished_goods_order_screen.dart';
+import 'package:piccolo/screens/pallet_management/edit_pallet.dart';
+import 'package:piccolo/screens/reach_truck/assembly_to_return.dart';
+import 'package:piccolo/screens/reach_truck/rt_jobs_pending.dart';
 import 'package:piccolo/screens/splash_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 

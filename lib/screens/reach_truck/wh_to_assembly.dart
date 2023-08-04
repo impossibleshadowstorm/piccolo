@@ -1,7 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:get/get.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:piccolo/constants.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+import '../../common/widgets/DefaultContainerButton.dart';
+import '../../common/widgets/ScanContainer.dart';
+import '../pallet_management/choose_sku_screen.dart';
 
 class WHAssembly extends StatefulWidget {
   const WHAssembly({super.key});
@@ -23,13 +31,22 @@ class _WHAssemblyState extends State<WHAssembly> {
     return Scaffold(
       backgroundColor: Constants.primaryBackgroundColor,
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20.0.sp,
+            )),
         backgroundColor: Constants.primaryOrangeColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Text(
-                "WH TO ASSEMBLY LINE",
+                "WH TO ASSEMBLY LINE".toTitleCase(),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: Colors.white,
@@ -37,27 +54,6 @@ class _WHAssemblyState extends State<WHAssembly> {
                     fontWeight: FontWeight.w400),
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  "Back",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0.sp,
-                      fontWeight: FontWeight.w400),
-                ),
-                SizedBox(
-                  width: 2.0.w,
-                ),
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.undo_sharp,
-                      color: Colors.white,
-                      size: 25.0.sp,
-                    ))
-              ],
-            )
           ],
         ),
       ),
@@ -83,76 +79,30 @@ class _WHAssemblyState extends State<WHAssembly> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    height: 5.0.h,
-                    width: double.infinity,
-                    margin:
-                        EdgeInsets.symmetric(vertical: 0.h, horizontal: 2.0.w),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 3.0.w, vertical: 0.0.h),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(3.0.w)),
-                    child: DropdownButton(
-                      isExpanded: true,
-                      value: selectedWHLocation,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 25.0.sp,
-                      ),
-                      underline: const SizedBox(),
-                      iconSize: 24,
-                      elevation: 16,
-                      hint: Text(
-                        "WH LOCATION",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15.0.sp,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedWHLocation = newValue!;
-                        });
-                      },
-                      items:
-                          whItems.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
+                  child: DefaultContainerButton(
+                    noIcon: false,
+                    icon: Icons.search,
+                    label: "WH Location",
+                    ontap: () {
+                      Get.to(() => const ChooseSKUScreen(
+                            type: "WH Location",
+                          ));
+                    },
                   ),
+                ),
+                SizedBox(
+                  width: 3.0.w,
                 ),
                 Expanded(
                   flex: 2,
-                  child: Container(
-                      height: 5.0.h,
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(3.0.w)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SCAN",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17.0.sp,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Icon(
-                            Icons.qr_code,
-                            size: 20.0.sp,
-                            color: Colors.white,
-                          )
-                        ],
-                      )),
+                  child: ScanContainer(
+                    onTap: () async {
+                      String barcodeScanRes =
+                          await FlutterBarcodeScanner.scanBarcode(
+                              "#808080", "Cancel", true, ScanMode.BARCODE);
+                      log(barcodeScanRes, name: "BarCode Value");
+                    },
+                  ),
                 )
               ],
             ),
@@ -163,76 +113,30 @@ class _WHAssemblyState extends State<WHAssembly> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    height: 5.0.h,
-                    width: double.infinity,
-                    margin: EdgeInsets.symmetric(
-                        vertical: 1.5.h, horizontal: 2.0.w),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 3.0.w, vertical: 0.0.h),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(3.0.w)),
-                    child: DropdownButton(
-                      isExpanded: true,
-                      value: selectedPalletNo,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 25.0.sp,
-                      ),
-                      underline: const SizedBox(),
-                      iconSize: 24,
-                      elevation: 16,
-                      hint: Text(
-                        "CHOOSE PALLET NO",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15.0.sp,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedPalletNo = newValue!;
-                        });
-                      },
-                      items: palletItems
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
+                  child: DefaultContainerButton(
+                    noIcon: false,
+                    icon: Icons.search,
+                    label: "Choose Pallet",
+                    ontap: () {
+                      Get.to(() => const ChooseSKUScreen(
+                            type: "Pallet",
+                          ));
+                    },
                   ),
+                ),
+                SizedBox(
+                  width: 3.0.w,
                 ),
                 Expanded(
                   flex: 2,
-                  child: Container(
-                      height: 5.0.h,
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(3.0.w)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SCAN",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17.0.sp,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Icon(
-                            Icons.qr_code,
-                            size: 20.0.sp,
-                            color: Colors.white,
-                          )
-                        ],
-                      )),
+                  child: ScanContainer(
+                    onTap: () async {
+                      String barcodeScanRes =
+                          await FlutterBarcodeScanner.scanBarcode(
+                              "#808080", "Cancel", true, ScanMode.BARCODE);
+                      log(barcodeScanRes, name: "BarCode Value");
+                    },
+                  ),
                 )
               ],
             ),
@@ -249,16 +153,17 @@ class _WHAssemblyState extends State<WHAssembly> {
               padding: EdgeInsets.symmetric(horizontal: 3.0.w, vertical: 0.0.h),
               decoration: BoxDecoration(
                   color: Colors.yellow.shade200,
-                  borderRadius: BorderRadius.circular(4.0.w)),
+                  borderRadius: BorderRadius.circular(2.0.w)),
               child: DropdownButton(
                 isExpanded: true,
+                onTap: () {},
                 value: dropdownValue,
                 icon: Icon(
                   Icons.arrow_drop_down,
                   size: 25.0.sp,
                 ),
                 hint: Text(
-                  "YOUR DROP LOCATIONS",
+                  "Choose Drop Location".toTitleCase(),
                   style: TextStyle(
                     color: Colors.brown,
                     fontSize: 18.0.sp,
@@ -285,7 +190,11 @@ class _WHAssemblyState extends State<WHAssembly> {
               ),
             ),
             SizedBox(
+              height: 2.0.h,
+            ),
+            SizedBox(
               width: double.infinity,
+              height: 6.0.h,
               child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -294,10 +203,10 @@ class _WHAssemblyState extends State<WHAssembly> {
                   },
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0.w)),
+                          borderRadius: BorderRadius.circular(2.0.w)),
                       backgroundColor: Constants.primaryOrangeColor),
                   child: Text(
-                    "DROP PALLET IN WH",
+                    "DROP PALLET".toTitleCase(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 17.0.sp,

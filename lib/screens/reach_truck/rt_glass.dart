@@ -1,9 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:get/get.dart';
 import 'package:piccolo/constants.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '../../common/widgets/DefaultContainerButton.dart';
+import '../../common/widgets/ScanContainer.dart';
+import '../pallet_management/choose_sku_screen.dart';
+
 class RTGlass extends StatefulWidget {
-  const RTGlass({super.key});
+  final String label;
+  const RTGlass({super.key, required this.label});
 
   @override
   State<RTGlass> createState() => _RTGlassState();
@@ -21,38 +30,26 @@ class _RTGlassState extends State<RTGlass> {
     return Scaffold(
       backgroundColor: Constants.primaryBackgroundColor,
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20.0.sp,
+            )),
         backgroundColor: Constants.primaryOrangeColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "GLASS",
+              widget.label.toTitleCase(),
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 18.0.sp,
                   fontWeight: FontWeight.w400),
             ),
-            Row(
-              children: [
-                Text(
-                  "Back",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0.sp,
-                      fontWeight: FontWeight.w400),
-                ),
-                SizedBox(
-                  width: 2.0.w,
-                ),
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.undo_sharp,
-                      color: Colors.white,
-                      size: 25.0.sp,
-                    ))
-              ],
-            )
           ],
         ),
       ),
@@ -71,40 +68,18 @@ class _RTGlassState extends State<RTGlass> {
               color: Constants.primaryOrangeColor,
               margin: EdgeInsets.symmetric(vertical: 1.5.h),
             ),
-            Container(
-              height: 6.0.h,
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(vertical: 1.5.h),
-              padding: EdgeInsets.symmetric(horizontal: 3.0.w, vertical: 0.0.h),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4.0.w)),
-              child: DropdownButton(
-                isExpanded: true,
-                value: dropdownValue,
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  size: 25.0.sp,
-                ),
-                underline: const SizedBox(),
-                iconSize: 24,
-                elevation: 16,
-                style: TextStyle(color: Colors.black, fontSize: 18.0.sp),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownValue = newValue!;
-                  });
-                },
-                items: options.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+            DefaultContainerButton(
+              noIcon: false,
+              icon: Icons.search,
+              label: "Choose Pickup Location",
+              ontap: () {
+                Get.to(() => const ChooseSKUScreen(
+                      type: "Location",
+                    ));
+              },
             ),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 1.0.h),
+              margin: EdgeInsets.symmetric(vertical: 2.0.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
@@ -127,153 +102,64 @@ class _RTGlassState extends State<RTGlass> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    height: 5.0.h,
-                    width: double.infinity,
-                    margin: EdgeInsets.symmetric(
-                        vertical: 1.5.h, horizontal: 2.0.w),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 3.0.w, vertical: 0.0.h),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(3.0.w)),
-                    child: DropdownButton(
-                      isExpanded: true,
-                      value: selectedPalletNo,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 25.0.sp,
-                      ),
-                      underline: const SizedBox(),
-                      iconSize: 24,
-                      elevation: 16,
-                      hint: Text(
-                        "CHOOSE PALLET NO",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15.0.sp,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedPalletNo = newValue!;
-                        });
-                      },
-                      items: palletItems
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
+                  child: DefaultContainerButton(
+                    noIcon: false,
+                    icon: Icons.search,
+                    label: "Choose Pallet",
+                    ontap: () {
+                      Get.to(() => const ChooseSKUScreen(
+                            type: "Pallet",
+                          ));
+                    },
                   ),
+                ),
+                SizedBox(
+                  width: 3.0.w,
                 ),
                 Expanded(
                   flex: 2,
-                  child: Container(
-                      height: 5.0.h,
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(3.0.w)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SCAN",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17.0.sp,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Icon(
-                            Icons.qr_code,
-                            size: 20.0.sp,
-                            color: Colors.white,
-                          )
-                        ],
-                      )),
+                  child: ScanContainer(
+                    onTap: () async {
+                      String barcodeScanRes =
+                          await FlutterBarcodeScanner.scanBarcode(
+                              "#808080", "Cancel", true, ScanMode.BARCODE);
+                      log(barcodeScanRes, name: "BarCode Value");
+                    },
+                  ),
                 )
               ],
+            ),
+            SizedBox(
+              height: 2.0.h,
             ),
             Row(
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    height: 5.0.h,
-                    width: double.infinity,
-                    margin:
-                        EdgeInsets.symmetric(vertical: 0.h, horizontal: 2.0.w),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 3.0.w, vertical: 0.0.h),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(3.0.w)),
-                    child: DropdownButton(
-                      isExpanded: true,
-                      value: selectedDrop,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 25.0.sp,
-                      ),
-                      underline: const SizedBox(),
-                      iconSize: 24,
-                      elevation: 16,
-                      hint: Text(
-                        "CHOOSE DROP",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15.0.sp,
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedDrop = newValue!;
-                        });
-                      },
-                      items: dropItems
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
+                  child: DefaultContainerButton(
+                    noIcon: false,
+                    icon: Icons.search,
+                    label: "Search Drop",
+                    ontap: () {
+                      Get.to(() => const ChooseSKUScreen(
+                            type: "Drop",
+                          ));
+                    },
                   ),
+                ),
+                SizedBox(
+                  width: 3.0.w,
                 ),
                 Expanded(
                   flex: 2,
-                  child: Container(
-                      height: 5.0.h,
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(3.0.w)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SCAN",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17.0.sp,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Icon(
-                            Icons.qr_code,
-                            size: 20.0.sp,
-                            color: Colors.white,
-                          )
-                        ],
-                      )),
+                  child: ScanContainer(
+                    onTap: () async {
+                      String barcodeScanRes =
+                          await FlutterBarcodeScanner.scanBarcode(
+                              "#808080", "Cancel", true, ScanMode.BARCODE);
+                      log(barcodeScanRes, name: "BarCode Value");
+                    },
+                  ),
                 )
               ],
             ),
@@ -284,15 +170,20 @@ class _RTGlassState extends State<RTGlass> {
               margin: EdgeInsets.symmetric(vertical: 2.h),
             ),
             SizedBox(
+              height: 6.0.h,
               width: double.infinity,
               child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      selectedPalletNo = "Pallet No. 1";
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0.w)),
+                          borderRadius: BorderRadius.circular(2.0.w)),
                       backgroundColor: Constants.primaryOrangeColor),
                   child: Text(
-                    "DROP PALLET IN WH",
+                    "Drop Pallet in WH",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 17.0.sp,

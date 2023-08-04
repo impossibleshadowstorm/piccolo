@@ -7,9 +7,11 @@ import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/screens/pallet_management/login_screen.dart';
 import 'package:piccolo/screens/pallet_management/manage_screen.dart';
+import 'package:piccolo/screens/reach_truck/rt_jobs_pending.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../models/LoginModel.dart';
+import 'finished_goods/finished_goods_manage_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,8 +34,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
         if (data?.role == "PALLET_CREATION") {
           Get.offAll(() => const ManageScreen());
-          return;
+        } else if (data?.role == "REACH_TRUCK") {
+          Get.offAll(() => RTJobsPendingScreen());
+        } else if (data?.role == "FG_PALLET_CREATION") {
+          Get.offAll(() => const FinishedGoodsManageScreen());
         }
+        return;
       }
       Get.offAll(() => const LoginScreen());
       return;

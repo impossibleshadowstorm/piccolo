@@ -6,3 +6,22 @@ class Constants {
 }
 
 const String secutiyCode = "piccoloDashboard@1";
+
+extension StringExtension on String {
+  String toTitleCase() {
+    if (this.isEmpty) {
+      return this;
+    }
+
+    final List<String> words = this.trim().split(' ');
+    final List<String> capitalizedWords = [];
+
+    for (final String word in words) {
+      final String firstLetter = word[0].toUpperCase();
+      final String remainingLetters = word.substring(1).toLowerCase();
+      capitalizedWords.add('$firstLetter$remainingLetters');
+    }
+
+    return capitalizedWords.join(' ');
+  }
+}

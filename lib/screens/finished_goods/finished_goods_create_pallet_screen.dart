@@ -1,6 +1,16 @@
+import 'dart:developer';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:wc_form_validators/wc_form_validators.dart';
+import '../../common/widgets/DefaultBtn.dart';
+import '../../common/widgets/DefaultContainerButton.dart';
+import '../../common/widgets/ScanContainer.dart';
 import '../../constants.dart';
+import '../pallet_management/choose_sku_screen.dart';
 
 class FinishedGoodsCreatePalletScreen extends StatefulWidget {
   const FinishedGoodsCreatePalletScreen({super.key});
@@ -12,6 +22,7 @@ class FinishedGoodsCreatePalletScreen extends StatefulWidget {
 
 class _FinishedGoodsCreatePalletScreenState
     extends State<FinishedGoodsCreatePalletScreen> {
+  int lenght = 5;
   String dropdownValue = 'Choose Order No.';
   List<String> options = ['Choose Order No.', 'Option 2', 'Option 3'];
 
@@ -21,6 +32,51 @@ class _FinishedGoodsCreatePalletScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20.0.sp,
+            )),
+        backgroundColor: Constants.primaryOrangeColor,
+        title: Text(
+          "Finished Good Pallet",
+          style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.0.sp,
+              fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0.w),
+            child: Row(
+              children: [
+                Text(
+                  "Save",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17.0.sp,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 1.5.w,
+                ),
+                Icon(
+                  Icons.save_outlined,
+                  color: Colors.white,
+                  size: 22.sp,
+                )
+              ],
+            ),
+          )
+        ],
+      ),
       backgroundColor: Constants.primaryBackgroundColor,
       body: SafeArea(
         child: SizedBox(
@@ -28,304 +84,250 @@ class _FinishedGoodsCreatePalletScreenState
           width: 100.w,
           child: Column(
             children: [
-              Container(
-                height: AppBar().preferredSize.height + 15,
-                width: 100.w,
-                color: Constants.primaryOrangeColor,
-                padding: EdgeInsets.symmetric(horizontal: 5.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "FINISHED GOODS PALLET",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 19.sp,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.1,
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 3.h),
+                      DefaultContainerButton(
+                        noIcon: false,
+                        icon: Icons.search,
+                        label: "Search Location",
+                        ontap: () {
+                          Get.to(() => const ChooseSKUScreen(
+                                type: "Location",
+                              ));
+                        },
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "Save",
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DefaultContainerButton(
+                              noIcon: true,
+                              icon: Icons.search,
+                              label: "Search Pallet",
+                              ontap: () {
+                                Get.to(() => const ChooseSKUScreen(
+                                      type: "Pallet",
+                                    ));
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 5.w),
+                          Expanded(
+                            child: ScanContainer(
+                              onTap: () async {
+                                String barcodeScanRes =
+                                    await FlutterBarcodeScanner.scanBarcode(
+                                        "#808080",
+                                        "Cancel",
+                                        true,
+                                        ScanMode.BARCODE);
+                                log(barcodeScanRes, name: "BarCode Value");
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        height: 4.h,
+                        color: Constants.primaryOrangeColor,
+                        thickness: 2,
+                      ),
+                      DefaultContainerButton(
+                        noIcon: false,
+                        icon: Icons.search,
+                        label: "Choose Order No",
+                        ontap: () {
+                          Get.to(() => const ChooseSKUScreen(
+                                type: "Order",
+                              ));
+                        },
+                      ),
+                      SizedBox(
+                        height: 2.0.h,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                obscureText: false,
+                                validator:
+                                    Validators.required("box no missings!!"),
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                decoration: InputDecoration(
+                                    fillColor: Colors.white,
+                                    filled: true,
+                                    hintText: "Box No",
+                                    hintStyle: TextStyle(
+                                        color: Colors.black, fontSize: 17.0.sp),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 5.w, vertical: 1.5.h),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(3.0.w))),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 5.w),
+                          Expanded(
+                            child: ScanContainer(
+                              onTap: () async {
+                                String barcodeScanRes =
+                                    await FlutterBarcodeScanner.scanBarcode(
+                                        "#808080",
+                                        "Cancel",
+                                        true,
+                                        ScanMode.BARCODE);
+                                log(barcodeScanRes, name: "BarCode Value");
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        height: 4.h,
+                        color: Constants.primaryOrangeColor,
+                        thickness: 2,
+                      ),
+                      Column(
+                        children: [
+                          DefaultBtn(
+                            kolor: Constants.primaryOrangeColor,
+                            label: "Add",
+                            onTap: () {},
+                          ),
+                          SizedBox(
+                            height: 2.0.h,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DefaultBtn(
+                                  kolor: Colors.red,
+                                  label: "Sent to Loading",
+                                  onTap: () {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.question,
+                                      animType: AnimType.rightSlide,
+                                      title: 'Alert!!!',
+                                      body: Column(
+                                        children: [
+                                          Text(
+                                            "Pallet No: 0001",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 18.0.sp,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            'This pallet will be moved to loading',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 17.0.sp,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                        ],
+                                      ),
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () {},
+                                    ).show();
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                width: 3.0.w,
+                              ),
+                              Expanded(
+                                child: DefaultBtn(
+                                  kolor: Colors.green,
+                                  label: "Sent to WH",
+                                  onTap: () {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.question,
+                                      animType: AnimType.rightSlide,
+                                      title: 'Alert!!!',
+                                      body: Column(
+                                        children: [
+                                          Text(
+                                            "Pallet No: 0001",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 18.0.sp,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            "This pallet will be moved to warehouse",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 17.0.sp,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                        ],
+                                      ),
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () {},
+                                    ).show();
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Text.rich(
+                        textAlign: TextAlign.end,
+                        TextSpan(
+                          text: "Pallet Capacity : ",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w300,
-                            letterSpacing: 0.1,
                           ),
-                        ),
-                        SizedBox(width: 2.5.w),
-                        Icon(
-                          Icons.save,
-                          color: Colors.white70,
-                          size: 25.sp,
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        SizedBox(height: 3.h),
-                        Container(
-                          width: 90.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(1.w),
-                          ),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: "SEARCH LOCATION",
-                              labelStyle: const TextStyle(color: Colors.black),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 5.w),
-                              border: InputBorder.none,
-                              suffixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black87,
-                                size: 20.sp,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Row(
                           children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "PALLET NO.",
-                                    labelStyle:
-                                        const TextStyle(color: Colors.black),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 5.w),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 5.w),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 1.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "SCAN",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18.sp,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    SizedBox(width: 2.w),
-                                    Icon(
-                                      Icons.qr_code_scanner,
-                                      color: Colors.white70,
-                                      size: 20.sp,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          height: 4.h,
-                          color: Constants.primaryOrangeColor,
-                          thickness: 2,
-                        ),
-                        Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.symmetric(vertical: 1.h),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 3.0.w,
-                            vertical: 0.5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(1.0.w),
-                          ),
-                          child: DropdownButton(
-                            isExpanded: true,
-                            value: dropdownValue,
-                            icon: Icon(
-                              Icons.arrow_drop_down,
-                              size: 25.0.sp,
-                            ),
-                            underline: const SizedBox(),
-                            iconSize: 24,
-                            elevation: 16,
-                            style: TextStyle(
-                                color: Colors.black, fontSize: 18.0.sp),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                dropdownValue = newValue!;
-                              });
-                            },
-                            items: options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0.w,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(1.0.w),
-                                ),
-                                child: DropdownButton(
-                                  isExpanded: true,
-                                  value: dropdownValue1,
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 20.0.sp,
-                                  ),
-                                  underline: const SizedBox(),
-                                  iconSize: 24,
-                                  elevation: 16,
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 18.0.sp),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      dropdownValue1 = newValue!;
-                                    });
-                                  },
-                                  items: options1
-                                      .map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 5.w),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 1.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(1.w),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "SCAN",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18.sp,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    SizedBox(width: 2.w),
-                                    Icon(
-                                      Icons.qr_code_scanner,
-                                      color: Colors.white70,
-                                      size: 20.sp,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          height: 4.h,
-                          color: Constants.primaryOrangeColor,
-                          thickness: 2,
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 1.h),
-                          decoration: BoxDecoration(
-                            color: Constants.primaryOrangeColor,
-                            borderRadius: BorderRadius.circular(2.5.w),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "Add",
+                            TextSpan(
+                              text: "Not mentioned",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w400,
                               ),
-                            ),
-                          ),
+                            )
+                          ],
                         ),
-                        SizedBox(height: 4.h),
-                        Text.rich(
-                          textAlign: TextAlign.end,
-                          TextSpan(
-                            text: "Pallet Capacity : ",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w300,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: "Not mentioned",
-                                style: TextStyle(
+                      ),
+                      SizedBox(height: 4.h),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: lenght,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                whTile(),
+                                Divider(
+                                  height: 4.h,
                                   color: Colors.white,
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w400,
+                                  thickness: 2,
                                 ),
-                              )
-                            ],
-                          ),
+                              ],
+                            );
+                          },
                         ),
-                        SizedBox(height: 4.h),
-                        SizedBox(
-                          height: ((60 + 4.h) * 10) + 30,
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: 10,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  whTile(),
-                                  Divider(
-                                    height: 4.h,
-                                    color: Colors.white,
-                                    thickness: 2,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -374,23 +376,60 @@ class _FinishedGoodsCreatePalletScreenState
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Container(
-                height: 30,
-                width: 22.5.w,
-                padding: EdgeInsets.symmetric(horizontal: 5.w),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(1.w),
-                ),
-                child: Center(
-                  child: Text(
-                    "Delete",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
+              InkWell(
+                onTap: () {
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.question,
+                    animType: AnimType.rightSlide,
+                    title: 'Alert!!!',
+                    body: Column(
+                      children: [
+                        Text(
+                          "Delete?",
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18.0.sp,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Box No: 86886',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 17.0.sp,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ],
+                    ),
+                    btnCancelOnPress: () {},
+                    btnOkOnPress: () {
+                      if (lenght > 0) {
+                        setState(() {
+                          lenght--;
+                        });
+                      }
+                    },
+                  ).show();
+                },
+                child: Container(
+                  height: 30,
+                  width: 22.5.w,
+                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(1.w),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Delete",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
                 ),

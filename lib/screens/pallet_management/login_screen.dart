@@ -6,9 +6,12 @@ import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/common/widgets/buttons.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/screens/pallet_management/manage_screen.dart';
+import 'package:piccolo/screens/reach_truck/rt_jobs_pending.dart';
 import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:wc_form_validators/wc_form_validators.dart';
+
+import '../finished_goods/finished_goods_manage_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -157,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       CustomProgressDialog(
                                     context,
                                     blur: 10,
+                                    dismissable: false,
                                     onDismiss: () =>
                                         log("Do something onDismiss"),
                                   );
@@ -169,6 +173,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (value.data?.role ==
                                           "PALLET_CREATION") {
                                         Get.offAll(() => const ManageScreen());
+                                      } else if (value.data?.role ==
+                                          "REACH_TRUCK") {
+                                        Get.offAll(() => RTJobsPendingScreen());
+                                      } else if (value.data?.role ==
+                                          "FG_PALLET_CREATION") {
+                                        Get.offAll(() =>
+                                            const FinishedGoodsManageScreen());
                                       }
                                     }
                                   });

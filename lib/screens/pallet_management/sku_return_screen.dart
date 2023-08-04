@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
@@ -235,11 +236,39 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
               kolor: Constants.primaryOrangeColor,
               label: "Remove",
               onTap: () {
-                if (lenght > 0) {
-                  setState(() {
-                    lenght--;
-                  });
-                }
+                AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.question,
+                  animType: AnimType.rightSlide,
+                  title: 'Alert!!!',
+                  body: Column(
+                    children: [
+                      Text(
+                        "Remove?",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18.0.sp,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'SKU: 86886283',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 17.0.sp,
+                            fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                  btnCancelOnPress: () {},
+                  btnOkOnPress: () {
+                    if (lenght > 0) {
+                      setState(() {
+                        lenght--;
+                      });
+                    }
+                  },
+                ).show();
               },
             ),
           ),
