@@ -10,6 +10,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../GlobalVariables.dart';
 import '../../constants.dart';
 import '../pallet_management/login_screen.dart';
+import 'assembly_to_loading.dart';
 
 class RTJobsPendingScreen extends StatelessWidget {
   RTJobsPendingScreen({super.key});
@@ -80,17 +81,27 @@ class RTJobsPendingScreen extends StatelessWidget {
                   onTap: () {
                     Get.to(() => const WHLoading());
                   },
-                  child: getTile("WH TO LOADING", "03")),
-              SizedBox(
+                  child: getTile("WH To Loading", "03")),
+              GestureDetector(
+                  onTap: () {
+                    Get.to(() => const AssmeblyToLoading());
+                  },
+                  child: getTile("Assembly To Loading", "03")),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 5.0.w),
                 height: 10.0.h,
                 width: double.infinity,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text(
-                      "Hello ${GlobalVariables.user?.name}",
-                      style: TextStyle(color: Colors.white, fontSize: 18.0.sp),
+                    Expanded(
+                      child: Text(
+                        "Hello ${GlobalVariables.user?.name}",
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            TextStyle(color: Colors.white, fontSize: 18.0.sp),
+                      ),
                     ),
                     GestureDetector(
                       onTap: () async {
