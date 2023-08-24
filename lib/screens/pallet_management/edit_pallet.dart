@@ -1,22 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/controller/PalletGetController.dart';
+import 'package:piccolo/models/MasterDataModel.dart';
+import 'package:piccolo/models/PalletDetailsPMModel.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:wc_form_validators/wc_form_validators.dart';
 
 import '../../common/widgets/DefaultBtn.dart';
 import '../../common/widgets/DefaultContainerButton.dart';
 import 'choose_sku_screen.dart';
 
 class EditPallet extends StatefulWidget {
-  const EditPallet({super.key});
+  final PalletDetail? pallet;
+  num maxWeight;
+  final String palletName;
+  EditPallet(
+      {super.key,
+      required this.maxWeight,
+      required this.pallet,
+      required this.palletName});
 
   @override
   State<EditPallet> createState() => _EditPalletState();
 }
 
 class _EditPalletState extends State<EditPallet> {
+  final controller = PalletGetController.palletController;
   TextEditingController weight = TextEditingController();
+  MasterPallet? selectedSKU;
+  MasterPallet? selectedVariant;
+  bool loading = true;
+
+  setVariant(String name) {
+    for (var element in controller.variants) {
+      if (element.name == name) {
+        selectedVariant = element;
+        setState(() {});
+      }
+    }
+  }
+
+  setSKU(String name) {
+    for (var element in controller.skuCodes) {
+      if (element.name == name) {
+        selectedSKU = element;
+        setState(() {});
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -26,8 +58,14 @@ class _EditPalletState extends State<EditPallet> {
 
   @override
   void initState() {
-    weight.text = "150.0";
-    setState(() {});
+    weight.text = widget.pallet?.weight ?? "0.0";
+    setSKU(widget.pallet?.skuCodeName ?? "");
+    setVariant(widget.pallet?.variantName ?? "");
+    widget.maxWeight =
+        widget.maxWeight + num.parse(widget.pallet?.weight ?? "0.0");
+    setState(() {
+      loading = false;
+    });
     super.initState();
   }
 
@@ -82,7 +120,7 @@ class _EditPalletState extends State<EditPallet> {
               height: 1.0.h,
             ),
             Text(
-              "Pallet no. P009",
+              "Pallet no. ${widget.palletName}",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 18.0.sp,
@@ -110,11 +148,15 @@ class _EditPalletState extends State<EditPallet> {
                       child: DefaultContainerButton(
                         noIcon: true,
                         icon: Icons.search,
-                        label: "1.2X1.2GGNS20-C",
-                        ontap: () {
-                          Get.to(() => const ChooseSKUScreen(
-                                type: "SKU",
-                              ));
+                        label: "${selectedSKU?.name}",
+                        ontap: () async {
+                          MasterPallet? locationVal =
+                              await Get.to<dynamic>(() => const ChooseSKUScreen(
+                                    type: "SKU",
+                                  ));
+                          setState(() {
+                            selectedSKU = locationVal;
+                          });
                         },
                       ),
                     ),
@@ -147,11 +189,16 @@ class _EditPalletState extends State<EditPallet> {
                             child: DefaultContainerButton(
                               noIcon: true,
                               icon: Icons.search,
-                              label: "Variant",
-                              ontap: () {
-                                Get.to(() => const ChooseSKUScreen(
-                                      type: "Variant",
-                                    ));
+                              label: "${selectedVariant?.name}",
+                              ontap: () async {
+                                MasterPallet? locationVal =
+                                    await Get.to<dynamic>(
+                                        () => const ChooseSKUScreen(
+                                              type: "Variant",
+                                            ));
+                                setState(() {
+                                  selectedVariant = locationVal;
+                                });
                               },
                             ),
                           ),
@@ -165,8 +212,16 @@ class _EditPalletState extends State<EditPallet> {
                                 keyboardType: TextInputType.number,
                                 obscureText: false,
                                 controller: weight,
-                                validator:
-                                    Validators.required("weight missing!!"),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter weight';
+                                  }
+                                  final number = int.tryParse(value);
+                                  if (number == null) {
+                                    return 'Please enter a valid number';
+                                  }
+                                  return null;
+                                },
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
                                 decoration: InputDecoration(
@@ -196,7 +251,20 @@ class _EditPalletState extends State<EditPallet> {
             DefaultBtn(
               kolor: Constants.primaryOrangeColor,
               label: "Update",
-              onTap: () {},
+              onTap: () {
+                num temp = num.parse(weight.text);
+                if (temp > widget.maxWeight) {
+                  Fluttertoast.showToast(
+                      msg: "Please enter weight less than ${widget.maxWeight}");
+                } else {
+                  widget.pallet?.skuCodeId = selectedSKU?.id;
+                  widget.pallet?.skuCodeName = selectedSKU?.name;
+                  widget.pallet?.variantId = selectedVariant?.id;
+                  widget.pallet?.variantName = selectedVariant?.name;
+                  widget.pallet?.weight = weight.text;
+                  Get.back(result: widget.pallet);
+                }
+              },
             ),
           ],
         ),

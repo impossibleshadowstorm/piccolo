@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/controller/PalletGetController.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ChooseSKUScreen extends StatefulWidget {
@@ -11,7 +13,21 @@ class ChooseSKUScreen extends StatefulWidget {
 }
 
 class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
+  final controller = PalletGetController.palletController;
   int selected = 0;
+  bool loading = true;
+  List all = [];
+  List filteredList = [];
+
+  @override
+  void initState() {
+    setState(() {
+      filteredList = [...getList(widget.type)];
+      all = [...getList(widget.type)];
+      loading = false;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +42,24 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
             Container(height: AppBar().preferredSize.height),
             TextFormField(
               style: const TextStyle(color: Colors.white),
+              onChanged: (val) {
+                if (val.isNotEmpty) {
+                  filteredList.clear();
+                  for (var element in all) {
+                    if (element.name
+                        .toLowerCase()
+                        .contains(val.toLowerCase())) {
+                      filteredList.add(element);
+                    }
+                  }
+                } else if (val.isEmpty) {
+                  filteredList.clear();
+                  for (var element in all) {
+                    filteredList.add(element);
+                  }
+                }
+                setState(() {});
+              },
               decoration: InputDecoration(
                 hintText: "Choose or Type ${widget.type}",
                 hintStyle: TextStyle(
@@ -45,12 +79,15 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
             ),
             SizedBox(height: 2.5.h),
             Expanded(
-              child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return chooseTile(index);
-                  }),
+              child: Visibility(
+                visible: !loading,
+                child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, index) {
+                      return chooseTile(index);
+                    }),
+              ),
             ),
           ],
         ),
@@ -64,6 +101,7 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
         setState(() {
           selected = index;
         });
+        Get.back(result: filteredList[index]);
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 1.5.h),
@@ -73,7 +111,7 @@ class _ChooseSKUScreenState extends State<ChooseSKUScreen> {
             ? Constants.primaryOrangeColor
             : Colors.transparent,
         child: Text(
-          "${widget.type} $index",
+          "${filteredList[index].name}",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w400,

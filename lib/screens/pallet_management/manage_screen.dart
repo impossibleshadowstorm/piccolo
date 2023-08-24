@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/controller/PalletGetController.dart';
 import 'package:piccolo/models/LoginModel.dart';
 import 'package:piccolo/screens/pallet_management/increase_capacity_screen.dart';
 import 'package:piccolo/screens/pallet_management/login_screen.dart';
@@ -55,6 +56,8 @@ class _ManageScreenState extends State<ManageScreen> {
                     SizedBox(height: 3.h),
                     InkWell(
                       onTap: () {
+                        final controller = PalletGetController.palletController;
+                        controller.listOfPalletItems.clear();
                         Get.to(() => const SKUReturnScreen());
                       },
                       child: CommonButtons.primaryOrangeFilledButton(

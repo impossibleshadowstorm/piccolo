@@ -2,10 +2,13 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/models/MasterDataModel.dart';
+import 'package:piccolo/models/PalletDetailsPMModel.dart';
 
 import '../models/LoginModel.dart';
 
@@ -49,8 +52,136 @@ class Webservices {
       }
       return null;
     } catch (e) {
-      log("Fatal Error in Login User API:- ${e.toString()}", name: "");
+      log("Fatal Error in Login User API:- ${e.toString()}", name: "loginUser");
       return null;
+    }
+  }
+
+  //API Method to fetch Master Data
+  Future<MasterData?> fetchMaster() async {
+    try {
+      Response res = await dio
+          .post("process/pallets/create", data: {"token": secutiyCode});
+      if (res.data.containsKey("error")) {
+        g.Get.snackbar("Failed!!", "${res.data["error"]}",
+            colorText: Colors.white);
+        return null;
+      }
+      final responseVal = MasterData.fromJson(res.data);
+      return responseVal;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Fetch Master API:- ${e.toString()}",
+          name: "fetchMaster");
+      return null;
+    }
+  }
+
+  //API Method to fetch Pallet Data
+  Future<PalletDetailsPm?> getPalletDetails(String palletName) async {
+    try {
+      Map<String, dynamic> body = {
+        "token": secutiyCode,
+        "pallet_name": palletName
+      };
+      Response res =
+          await dio.post("process/pallets/get-pallet-details", data: body);
+      if (res.data.containsKey("error")) {
+        g.Get.snackbar("Failed!!", "${res.data["error"]}",
+            colorText: Colors.white);
+        return null;
+      }
+      if (res.data["data"].runtimeType == List) {
+        return null;
+      } else {
+        final responseVal = PalletDetailsPm.fromJson(res.data);
+        return responseVal;
+      }
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Fetch Pallet Details API:- ${e.toString()}",
+          name: "getPalletDetails");
+      return null;
+    }
+  }
+
+  //API Method to Store Pallet Data
+  Future<bool> storePallet(Map<String, dynamic> body) async {
+    try {
+      body.addAll(
+          {"token": secutiyCode, "created_by": GlobalVariables.user?.id});
+      Response res = await dio.post("process/pallets/store", data: body);
+      Map tempMap = res.data["data"];
+      if (tempMap.containsKey("success")) {
+        Fluttertoast.showToast(msg: "${tempMap['success']}");
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: "Unable to add pallet, please try again later...");
+        return false;
+      }
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      log("Fatal Error in Store Pallet Details API:- ${e.toString()}",
+          name: "storePallet");
+      return false;
+    }
+  }
+
+  //API Method to Update Pallet Data
+  Future<bool> updatePallet(
+      Map<String, dynamic> body, int masterPalletID) async {
+    try {
+      body.addAll(
+          {"token": secutiyCode, "created_by": GlobalVariables.user?.id});
+      Response res =
+          await dio.put("process/pallets/update/$masterPalletID", data: body);
+      Map tempMap = res.data["data"];
+      if (tempMap.containsKey("success")) {
+        Fluttertoast.showToast(msg: "${tempMap['success']}");
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: "Unable to add pallet, please try again later...");
+        return false;
+      }
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      log("Fatal Error in Update Pallet Details API:- ${e.toString()}",
+          name: "updatePallet");
+      return false;
     }
   }
 }

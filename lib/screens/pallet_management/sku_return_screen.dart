@@ -1,15 +1,22 @@
 import 'dart:developer';
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '../../GlobalVariables.dart';
 import '../../common/widgets/DefaultBtn.dart';
 import '../../common/widgets/DefaultContainerButton.dart';
 import '../../common/widgets/ScanContainer.dart';
 import '../../constants.dart';
+import '../../controller/PalletGetController.dart';
+import '../../models/MasterDataModel.dart';
+import '../../models/PalletDetailsPMModel.dart';
+import '../../services/webservices.dart';
 import 'choose_sku_screen.dart';
 
 class SKUReturnScreen extends StatefulWidget {
@@ -20,6 +27,14 @@ class SKUReturnScreen extends StatefulWidget {
 }
 
 class _SKUReturnScreenState extends State<SKUReturnScreen> {
+  final controller = PalletGetController.palletController;
+  Location? selectedLocation;
+  MasterPallet? selectedPallet;
+  PalletDetailsPm? palletDetails;
+  List<PalletDetail> listPallets = [];
+  List<Map<String, dynamic>> pList = [];
+  final Webservices _webservices = Webservices();
+  num totalWeight = 0;
   int lenght = 4;
   @override
   Widget build(BuildContext context) {
@@ -45,26 +60,68 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0.w),
-            child: Row(
-              children: [
-                Text(
-                  "Save",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17.0.sp,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  width: 1.5.w,
-                ),
-                Icon(
-                  Icons.save_outlined,
-                  color: Colors.white,
-                  size: 22.sp,
-                )
-              ],
+          GestureDetector(
+            onTap: () async {
+              //log(body.toString(), name: "Body+");
+              CustomProgressDialog progressDialog =
+                  // ignore: use_build_context_synchronously
+                  CustomProgressDialog(
+                context,
+                blur: 10,
+                dismissable: true,
+                onDismiss: () => log("Do something onDismiss"),
+              );
+              progressDialog.show();
+              List<Map<String, dynamic>> tempList = [];
+              for (var element in controller.listOfPalletItems) {
+                String formattedDateActual =
+                    DateFormat('yyyy-MM-dd').format(DateTime.now());
+                tempList.add({
+                  "id": element.id,
+                  "sku_code_id": element.skuCodeId,
+                  "variant_id": element.variantId,
+                  "weight": num.tryParse(element.weight ?? "0.0"),
+                  "batch": element.batch,
+                  "batch_date": formattedDateActual
+                });
+              }
+              Map<String, dynamic> body = {
+                "location_id": selectedLocation?.id,
+                "master_pallet_id": selectedPallet?.id,
+                "updated_by": GlobalVariables.user?.id,
+                "is_request_for_warehouse": true,
+                "pallet_details": tempList
+              };
+              await _webservices
+                  .updatePallet(body, palletDetails?.data?.id?.toInt() ?? -1)
+                  .then((value) {
+                progressDialog.dismiss();
+                if (value) {
+                  Get.back();
+                }
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5.0.w),
+              child: Row(
+                children: [
+                  Text(
+                    "Save",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17.0.sp,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 1.5.w,
+                  ),
+                  Icon(
+                    Icons.save_outlined,
+                    color: Colors.white,
+                    size: 22.sp,
+                  )
+                ],
+              ),
             ),
           )
         ],
@@ -83,11 +140,16 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                   DefaultContainerButton(
                     noIcon: false,
                     icon: Icons.search,
-                    label: "Search Location",
-                    ontap: () {
-                      Get.to(() => const ChooseSKUScreen(
-                            type: "Location",
-                          ));
+                    label: selectedLocation?.name ?? "Search Location",
+                    ontap: () async {
+                      Location? locationVal =
+                          await Get.to<dynamic>(() => const ChooseSKUScreen(
+                                type: "Location",
+                              ));
+
+                      setState(() {
+                        selectedLocation = locationVal;
+                      });
                     },
                   ),
                   SizedBox(height: 2.h),
@@ -97,11 +159,70 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                         child: DefaultContainerButton(
                           noIcon: true,
                           icon: Icons.search,
-                          label: "Search Pallet",
-                          ontap: () {
-                            Get.to(() => const ChooseSKUScreen(
-                                  type: "Pallet",
-                                ));
+                          label: selectedPallet?.name ?? "Search Pallet",
+                          ontap: () async {
+                            MasterPallet? locationVal = await Get.to<dynamic>(
+                                () => const ChooseSKUScreen(
+                                      type: "Pallet",
+                                    ));
+                            selectedPallet = locationVal;
+                            if (locationVal != null) {
+                              CustomProgressDialog progressDialog =
+                                  // ignore: use_build_context_synchronously
+                                  CustomProgressDialog(
+                                context,
+                                blur: 10,
+                                dismissable: false,
+                                onDismiss: () => log("Do something onDismiss"),
+                              );
+                              progressDialog.show();
+                              _webservices
+                                  .getPalletDetails(locationVal.name!)
+                                  .then((value) {
+                                progressDialog.dismiss();
+                                palletDetails = value;
+                                selectedPallet = locationVal;
+                                if (value != null) {
+                                  var index = controller.masterPallets
+                                      .firstWhere((element) =>
+                                          element.name ==
+                                          palletDetails?.data?.palletName);
+                                  selectedPallet = index;
+
+                                  var indexLoc = controller.locationsList
+                                      .firstWhere((element) =>
+                                          element.name ==
+                                          palletDetails
+                                              ?.data?.palletLastLocation);
+                                  selectedLocation = indexLoc;
+
+                                  //
+                                  //
+                                  controller.listOfPalletItems.clear();
+                                  palletDetails?.data?.palletDetails
+                                      ?.forEach((element) {
+                                    controller.listOfPalletItems.add(element);
+                                    listPallets.add(element);
+                                    pList.add({
+                                      "id": element.id,
+                                      "sku_code_id": element.skuCodeId,
+                                      "variant_id": element.variantId,
+                                      "weight":
+                                          num.tryParse(element.weight ?? "0.0"),
+                                      "batch": element.batch,
+                                    });
+                                    totalWeight = totalWeight +
+                                        num.parse(element.weight ?? "0.0");
+                                  });
+
+                                  //
+                                  //
+                                  setState(() {});
+                                }
+                                setState(() {});
+                              });
+                            }
+                            setState(() {});
                           },
                         ),
                       ),
@@ -129,20 +250,67 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                   DefaultBtn(
                     kolor: Colors.green,
                     label: "Request Warehouse",
-                    onTap: () {},
+                    onTap: () async {
+                      //log(body.toString(), name: "Body+");
+                      CustomProgressDialog progressDialog =
+                          // ignore: use_build_context_synchronously
+                          CustomProgressDialog(
+                        context,
+                        blur: 10,
+                        dismissable: false,
+                        onDismiss: () => log("Do something onDismiss"),
+                      );
+                      progressDialog.show();
+                      List<Map<String, dynamic>> tempList = [];
+                      for (var element in controller.listOfPalletItems) {
+                        String formattedDateActual =
+                            DateFormat('yyyy-MM-dd').format(DateTime.now());
+                        tempList.add({
+                          "id": element.id,
+                          "sku_code_id": element.skuCodeId,
+                          "variant_id": element.variantId,
+                          "weight": num.tryParse(element.weight ?? "0.0"),
+                          "batch": element.batch,
+                          "batch_date": formattedDateActual
+                        });
+                      }
+                      Map<String, dynamic> body = {
+                        "location_id": selectedLocation?.id,
+                        "master_pallet_id": selectedPallet?.id,
+                        "updated_by": GlobalVariables.user?.id,
+                        "is_request_for_warehouse": true,
+                        "pallet_details": tempList
+                      };
+                      await _webservices
+                          .updatePallet(
+                              body, palletDetails?.data?.id?.toInt() ?? -1)
+                          .then((value) {
+                        progressDialog.dismiss();
+                        if (value) {
+                          Get.back();
+                        }
+                      });
+                    },
                   ),
                   SizedBox(height: 4.h),
-                  ListView.separated(
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) => whTile(),
-                      separatorBuilder: (context, index) => Divider(
-                            height: 5.h,
-                            color: Colors.white,
-                            thickness: 2,
-                          ),
-                      itemCount: lenght),
+                  Obx(
+                    () => ListView.separated(
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) => SKUReturnTile(
+                              index: index,
+                              weight: num.parse(
+                                  controller.listOfPalletItems[index].weight ??
+                                      "0.0"),
+                            ),
+                        separatorBuilder: (context, index) => Divider(
+                              height: 5.h,
+                              color: Colors.white,
+                              thickness: 2,
+                            ),
+                        itemCount: controller.listOfPalletItems.length),
+                  ),
                   Divider(
                     height: 4.5.h,
                     color: Colors.white,
@@ -168,8 +336,32 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
       ),
     );
   }
+}
 
-  Widget whTile() {
+class SKUReturnTile extends StatefulWidget {
+  final int index;
+  final num weight;
+  const SKUReturnTile({super.key, required this.index, required this.weight});
+
+  @override
+  State<SKUReturnTile> createState() => _SKUReturnTileState();
+}
+
+class _SKUReturnTileState extends State<SKUReturnTile> {
+  final controller = PalletGetController.palletController;
+
+  TextEditingController weight = TextEditingController();
+
+  @override
+  void initState() {
+    setState(() {
+      weight.text = widget.weight.toString();
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 100.w,
       padding: EdgeInsets.symmetric(horizontal: 1.5.w),
@@ -180,7 +372,7 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "SKU: AH556ZT",
+                  "SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -190,7 +382,7 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                   ),
                 ),
                 Text(
-                  "VAR: 80NN",
+                  "VAR: ${controller.listOfPalletItems[widget.index].variantName}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -199,37 +391,60 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                     fontWeight: FontWeight.w300,
                   ),
                 ),
-                Text(
-                  "WEIGHT: 100KG",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w300,
+                Obx(
+                  () => Text(
+                    "WEIGHT: ${controller.listOfPalletItems[widget.index].weight}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
-                ),
+                )
               ],
             ),
           ),
           Expanded(
-            child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 3.0.w),
-                height: 6.0.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(3.w),
+            child: Center(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 2.0.w),
+                width: double.infinity,
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  obscureText: false,
+                  controller: weight,
+                  onChanged: (val) {
+                    if (val.isNotEmpty) {
+                      num tempVal = num.tryParse(val) ?? 0.0;
+                      controller.listOfPalletItems[widget.index].weight = val;
+                      setState(() {});
+                    }
+                  },
+                  // validator: (value) {
+                  //   if (value == null || value.isEmpty) {
+                  //     return 'Please enter weight';
+                  //   }
+                  //   final number = int.tryParse(value);
+                  //   if (number == null) {
+                  //     return 'Please enter a valid number';
+                  //   }
+                  //   return null;
+                  // },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  decoration: InputDecoration(
+                      fillColor: Colors.white,
+                      filled: true,
+                      hintText: "Weight",
+                      hintStyle:
+                          TextStyle(color: Colors.black, fontSize: 17.0.sp),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 5.w),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3.0.w))),
                 ),
-                child: Center(
-                  child: Text(
-                    "100Kg",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                )),
+              ),
+            ),
           ),
           Expanded(
             child: DefaultBtn(
@@ -251,7 +466,7 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'SKU: 86886283',
+                        'SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.black,
@@ -262,11 +477,7 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                   ),
                   btnCancelOnPress: () {},
                   btnOkOnPress: () {
-                    if (lenght > 0) {
-                      setState(() {
-                        lenght--;
-                      });
-                    }
+                    controller.listOfPalletItems.removeAt(widget.index);
                   },
                 ).show();
               },

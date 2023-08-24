@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:piccolo/controller/PalletGetController.dart';
 
 class Constants {
   static Color primaryBackgroundColor = const Color(0xFF2B2A28);
@@ -23,5 +24,21 @@ extension StringExtension on String {
     }
 
     return capitalizedWords.join(' ');
+  }
+}
+
+List getList(String label) {
+  final controller = PalletGetController.palletController;
+  switch (label) {
+    case 'Location':
+      return controller.locationsList;
+    case 'Pallet':
+      return controller.masterPallets;
+    case 'SKU':
+      return controller.skuCodes;
+    case 'Variant':
+      return controller.variants;
+    default:
+      return [];
   }
 }

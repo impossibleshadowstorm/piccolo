@@ -11,6 +11,7 @@ import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:wc_form_validators/wc_form_validators.dart';
 
+import '../../controller/PalletGetController.dart';
 import '../finished_goods/finished_goods_manage_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -25,6 +26,23 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   final Webservices webservices = Webservices();
+  final controller = PalletGetController.palletController;
+
+  Future<void> fetchMasterDate() async {
+    await webservices.fetchMaster().then((value) {
+      if (value != null) {
+        controller.locationsList.value = value.data?.locations ?? [];
+        controller.masterPallets.value = value.data?.masterPallets ?? [];
+        controller.skuCodes.value = value.data?.skuCodes ?? [];
+        controller.variants.value = value.data?.variants ?? [];
+        controller.maxWeightForContainer.value =
+            value.data?.maxWeightForContainer ?? 0;
+        controller.maxWeightForPallet.value =
+            value.data?.maxWeightForPallet ?? 0;
+        return;
+      }
+    });
+  }
 
   @override
   void setState(VoidCallback fn) {
@@ -167,21 +185,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                   progressDialog.show();
                                   webservices
                                       .loginUser(email.text, password.text)
-                                      .then((value) {
-                                    progressDialog.dismiss();
-                                    if (value != null) {
-                                      if (value.data?.role ==
-                                          "PALLET_CREATION") {
-                                        Get.offAll(() => const ManageScreen());
-                                      } else if (value.data?.role ==
-                                          "REACH_TRUCK") {
-                                        Get.offAll(() => RTJobsPendingScreen());
-                                      } else if (value.data?.role ==
-                                          "FG_PALLET_CREATION") {
-                                        Get.offAll(() =>
-                                            const FinishedGoodsManageScreen());
+                                      .then((value) async {
+                                    await fetchMasterDate().whenComplete(() {
+                                      progressDialog.dismiss();
+                                      if (value != null) {
+                                        if (value.data?.role ==
+                                            "PALLET_CREATION") {
+                                          Get.offAll(
+                                              () => const ManageScreen());
+                                        }
+                                        // else if (value.data?.role ==
+                                        //     "REACH_TRUCK") {
+                                        //   Get.offAll(
+                                        //       () => RTJobsPendingScreen());
+                                        // } else if (value.data?.role ==
+                                        //     "FG_PALLET_CREATION") {
+                                        //   Get.offAll(() =>
+                                        //       const FinishedGoodsManageScreen());
+                                        // }
                                       }
-                                    }
+                                    });
                                   });
                                 }
                               },

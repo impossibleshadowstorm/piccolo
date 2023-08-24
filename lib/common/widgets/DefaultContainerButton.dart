@@ -31,9 +31,13 @@ class DefaultContainerButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
           children: [
-            Text(
-              label,
-              style: TextStyle(color: Colors.black, fontSize: 17.0.sp),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(color: Colors.black, fontSize: 17.0.sp),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
             noIcon
                 ? const SizedBox()
