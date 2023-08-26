@@ -51,18 +51,20 @@ class _SplashScreenState extends State<SplashScreen> {
       LoginData? data = box.get("loginData");
 
       if (data?.id != null) {
-        fetchMasterDate().whenComplete(() {
-          GlobalVariables.user = data;
+        GlobalVariables.user = data;
 
-          if (data?.role == "PALLET_CREATION") {
-            Get.offAll(() => const ManageScreen());
-          } else if (data?.role == "REACH_TRUCK") {
-            Get.offAll(() => RTJobsPendingScreen());
-          } else if (data?.role == "FG_PALLET_CREATION") {
-            Get.offAll(() => const FinishedGoodsManageScreen());
-          }
-          return;
-        });
+        // if (data?.role == "PALLET_CREATION") {
+        //   fetchMasterDate().whenComplete(() {
+        //     Get.offAll(() => const ManageScreen());
+        //   });
+        // } else
+        if (data?.role == "REACH_TRUCK") {
+          Get.offAll(() => RTJobsPendingScreen());
+        }
+        // else if (data?.role == "FG_PALLET_CREATION") {
+        //   Get.offAll(() => const FinishedGoodsManageScreen());
+        // }
+        return;
       }
       Get.offAll(() => const LoginScreen());
       return;

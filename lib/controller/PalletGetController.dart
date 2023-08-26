@@ -6,6 +6,7 @@ class PalletGetController extends GetxController {
   var skuCodes = [].obs;
   var variants = [].obs;
   var locationsList = [].obs;
+  var dropLocationsList = [].obs;
   var maxWeightForContainer = 0.obs;
   var maxWeightForPallet = 0.obs;
   var listOfPalletItems = <PalletDetail>[].obs;

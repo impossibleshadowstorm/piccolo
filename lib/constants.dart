@@ -38,6 +38,8 @@ List getList(String label) {
       return controller.skuCodes;
     case 'Variant':
       return controller.variants;
+    case 'Drop':
+      return controller.dropLocationsList;
     default:
       return [];
   }

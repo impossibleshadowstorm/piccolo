@@ -189,16 +189,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     await fetchMasterDate().whenComplete(() {
                                       progressDialog.dismiss();
                                       if (value != null) {
-                                        if (value.data?.role ==
-                                            "PALLET_CREATION") {
-                                          Get.offAll(
-                                              () => const ManageScreen());
-                                        }
-                                        // else if (value.data?.role ==
-                                        //     "REACH_TRUCK") {
+                                        // if (value.data?.role ==
+                                        //     "PALLET_CREATION") {
                                         //   Get.offAll(
-                                        //       () => RTJobsPendingScreen());
-                                        // } else if (value.data?.role ==
+                                        //       () => const ManageScreen());
+                                        // }
+                                        // else
+                                        if (value.data?.role == "REACH_TRUCK") {
+                                          Get.offAll(
+                                              () => RTJobsPendingScreen());
+                                        }
+
+                                        // else
+                                        // if (value.data?.role ==
                                         //     "FG_PALLET_CREATION") {
                                         //   Get.offAll(() =>
                                         //       const FinishedGoodsManageScreen());

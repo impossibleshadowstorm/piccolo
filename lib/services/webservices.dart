@@ -9,8 +9,11 @@ import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/models/MasterDataModel.dart';
 import 'package:piccolo/models/PalletDetailsPMModel.dart';
+import 'package:piccolo/models/RTModels/RTCreateModel.dart';
 
 import '../models/LoginModel.dart';
+import '../models/RTModels/HomeModel.dart';
+import '../models/RTModels/RTPalletModel.dart';
 
 class Webservices {
   static Map<String, String> header = {
@@ -181,6 +184,104 @@ class Webservices {
     } catch (e) {
       log("Fatal Error in Update Pallet Details API:- ${e.toString()}",
           name: "updatePallet");
+      return false;
+    }
+  }
+
+  //################################################################# REACH TRUCK APIS ############################################################################
+
+  //API Method to fetch RT Home Details
+  Future<RtHomeModel?> getRTHome() async {
+    try {
+      Map body = {"token": secutiyCode};
+      Response res = await dio.post("process/reach-truck/home", data: body);
+      final data = RtHomeModel.fromJson(res.data);
+      return data;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Get RT Home Details API:- ${e.toString()}",
+          name: "getRTHome");
+      return null;
+    }
+  }
+
+  //API Method to fetch RT Create Details
+  Future<RtCreateModel?> getRTCreateDetails(String locationType) async {
+    try {
+      Map body = {"token": secutiyCode, "location_type": locationType};
+      Response res = await dio.post("process/reach-truck/create", data: body);
+      final data = RtCreateModel.fromJson(res.data);
+      return data;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Get RT Create Details API:- ${e.toString()}",
+          name: "getRTCreateDetails");
+      return null;
+    }
+  }
+
+  //API Method to fetch RT Pallet Details
+  Future<RtPalletModel?> getRTPalletDetails(Map<String, dynamic> body) async {
+    try {
+      body.addAll({"token": secutiyCode});
+      Response res = await dio
+          .post("process/reach-truck/get-pallet-for-reach-truck", data: body);
+      final data = RtPalletModel.fromJson(res.data);
+      return data;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Get RT Pallet Details API:- ${e.toString()}",
+          name: "getRTPalletDetails");
+      return null;
+    }
+  }
+
+  //API Method to Store RT Pallet Details
+  Future<bool> storeRTDetail(Map<String, dynamic> body) async {
+    try {
+      body.addAll({"token": secutiyCode});
+      Response res = await dio.post("process/reach-truck/store", data: body);
+      log("${res.data}");
+      log("${res.statusCode}");
+      Fluttertoast.showToast(msg: "Pallet Drop Successfull");
+      return true;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          log("${d.response?.data["error"]}", name: "Error");
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      log("Fatal Error in Store RT Details API:- ${e.toString()}",
+          name: "storeRTDetail");
       return false;
     }
   }
