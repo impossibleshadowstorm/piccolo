@@ -8,6 +8,7 @@ import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
+import 'package:piccolo/models/MasterDataModel.dart';
 import 'package:piccolo/models/RTModels/RTCreateModel.dart';
 
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -37,7 +38,8 @@ class _RTGlassState extends State<RTGlass> {
   String? dropdownValue;
   List<String> options = [];
   bool palletMatch = false;
-  bool palletScanned = false;
+  bool palletScanned = true;
+  bool dropdownDisable = false;
   String? selectedDrop;
   List<String> palletItems = ["Pallet No. 1", "Pallet No. 2", "Pallet No. 3"];
   List<String> dropItems = ["Drop No. 1", "Drop No. 2", "Drop No. 3"];
@@ -50,7 +52,8 @@ class _RTGlassState extends State<RTGlass> {
         controller.dropLocationsList.clear();
         model = value;
         value.data?.fromLocations?.forEach((element) {
-          controller.locationsList.add(element);
+          var val = element;
+          controller.locationsList.add(val);
         });
         value.data?.toLocations?.forEach((element) {
           controller.dropLocationsList.add(element);
@@ -58,6 +61,21 @@ class _RTGlassState extends State<RTGlass> {
       }
       setState(() {});
     });
+  }
+
+  void setDrop() {
+    for (var element in controller.dropLocationsList) {
+      int index = palletModel.data?.indexWhere((element) =>
+              element.pallet?.masterPallet?.name == dropdownValue) ??
+          -1;
+      if (index != -1) {}
+      if (element.id.toString() ==
+          palletModel.data?[index].toLocationableId.toString()) {
+        selectedToLocation = element;
+        dropdownDisable = true;
+        setState(() {});
+      }
+    }
   }
 
   @override
@@ -216,6 +234,7 @@ class _RTGlassState extends State<RTGlass> {
                               setState(() {
                                 dropdownValue = newValue!;
                               });
+                              setDrop();
                             },
                             items: options
                                 .map<DropdownMenuItem<String>>((String value) {
@@ -297,13 +316,16 @@ class _RTGlassState extends State<RTGlass> {
                               Fluttertoast.showToast(
                                   msg: "Please select pallet");
                             } else {
-                              ToLocation val = await Get.to<dynamic>(
-                                  () => const ChooseSKUScreen(
-                                        type: "Drop",
-                                      ));
+                              if (dropdownDisable) {
+                              } else {
+                                ToLocation? val = await Get.to<dynamic>(
+                                    () => const ChooseSKUScreen(
+                                          type: "Drop",
+                                        ));
 
-                              selectedToLocation = val;
-                              setState(() {});
+                                selectedToLocation = val;
+                                setState(() {});
+                              }
                             }
                           },
                         ),
@@ -311,21 +333,54 @@ class _RTGlassState extends State<RTGlass> {
                       SizedBox(
                         width: 3.0.w,
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: ScanContainer(
-                          onTap: () async {
-                            String barcodeScanRes =
-                                await FlutterBarcodeScanner.scanBarcode(
-                                    "#808080",
-                                    "Cancel",
-                                    true,
-                                    ScanMode.BARCODE);
-                            log(barcodeScanRes, name: "BarCode Value");
-                          },
+                      Visibility(
+                        visible: (widget.label == "GLASS" ||
+                            widget.label == "CERAMIC" ||
+                            widget.label == "RECYCLE" ||
+                            widget.label == "ASSEMBLY LINE TO WH"),
+                        child: Expanded(
+                          flex: 2,
+                          child: ScanContainer(
+                            onTap: () async {
+                              String barcodeScanRes =
+                                  await FlutterBarcodeScanner.scanBarcode(
+                                      "#808080",
+                                      "Cancel",
+                                      true,
+                                      ScanMode.BARCODE);
+                              log(barcodeScanRes, name: "BarCode Value");
+                            },
+                          ),
                         ),
-                      )
+                      ),
                     ],
+                  ),
+                  Visibility(
+                    visible: widget.label == "ASSEMBLY LINE TO WH",
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 3.5.w, vertical: 0.5.h),
+                      width: double.infinity,
+                      margin: EdgeInsets.symmetric(vertical: 1.0.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(
+                            "LAST LOCATION: GENERAL",
+                            overflow: TextOverflow.visible,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.5.sp,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 1.0.h,
                   ),
                   Container(
                     height: 1,
@@ -346,7 +401,8 @@ class _RTGlassState extends State<RTGlass> {
                               "reach_truck_id": palletModel.data
                                       ?.firstWhereOrNull((element) =>
                                           element.pallet?.masterPallet?.name ==
-                                          dropdownValue) ??
+                                          dropdownValue)
+                                      ?.id ??
                                   0,
                               "from_locationable_type":
                                   model.data?.fromLocationType,
@@ -390,7 +446,7 @@ class _RTGlassState extends State<RTGlass> {
                         )),
                   ),
                   Visibility(
-                    visible: !(palletMatch),
+                    visible: (palletMatch),
                     child: Container(
                       width: double.infinity,
                       margin: EdgeInsets.symmetric(vertical: 3.0.h),

@@ -24,6 +24,7 @@ class Data {
   List<MasterPallet>? skuCodes;
   List<MasterPallet>? variants;
   List<Location>? locations;
+  List<Orders>? order;
   int? maxWeightForPallet;
   int? maxWeightForContainer;
 
@@ -31,22 +32,30 @@ class Data {
     this.masterPallets,
     this.skuCodes,
     this.variants,
+    this.order,
     this.locations,
     this.maxWeightForPallet,
     this.maxWeightForContainer,
   });
 
   factory Data.fromJson(Map<String?, dynamic> json) => Data(
+        order: json["orders"] == null
+            ? []
+            : List<Orders>.from(json["orders"].map((x) => Orders.fromJson(x))),
         masterPallets: List<MasterPallet>.from(
             json["masterPallets"].map((x) => MasterPallet.fromJson(x))),
-        skuCodes: List<MasterPallet>.from(
-            json["skuCodes"].map((x) => MasterPallet.fromJson(x))),
-        variants: List<MasterPallet>.from(
-            json["variants"].map((x) => MasterPallet.fromJson(x))),
+        skuCodes: json["skuCodes"] == null
+            ? []
+            : List<MasterPallet>.from(
+                json["skuCodes"].map((x) => MasterPallet.fromJson(x))),
+        variants: json["variants"] == null
+            ? []
+            : List<MasterPallet>.from(
+                json["variants"].map((x) => MasterPallet.fromJson(x))),
         locations: List<Location>.from(
             json["locations"].map((x) => Location.fromJson(x))),
-        maxWeightForPallet: json["maxWeightForPallet"],
-        maxWeightForContainer: json["maxWeightForContainer"],
+        maxWeightForPallet: json["maxWeightForPallet"] ?? 0,
+        maxWeightForContainer: json["maxWeightForContainer"] ?? 0,
       );
 }
 
@@ -65,6 +74,21 @@ class Location {
         id: json["id"],
         name: json["name"],
         abbr: json["abbr"],
+      );
+}
+
+class Orders {
+  int? id;
+  String? name;
+
+  Orders({
+    this.id,
+    this.name,
+  });
+
+  factory Orders.fromJson(Map<String?, dynamic> json) => Orders(
+        id: json["id"],
+        name: json["order_number"],
       );
 }
 

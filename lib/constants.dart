@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
+import 'package:piccolo/screens/pallet_management/login_screen.dart';
 
 class Constants {
   static Color primaryBackgroundColor = const Color(0xFF2B2A28);
@@ -27,6 +30,24 @@ extension StringExtension on String {
   }
 }
 
+Future<void> logout() async {
+  final controller = PalletGetController.palletController;
+  controller.dropLocationsList.clear();
+  controller.listOfPalletItems.clear();
+  controller.locationsList.clear();
+  controller.masterPallets.clear();
+  controller.maxWeightForContainer.value = 0;
+  controller.maxWeightForPallet.value = 0;
+  controller.skuCodes.clear();
+  controller.variants.clear();
+  controller.orderList.clear();
+  controller.dropLocationsList.clear();
+  controller.listOfPalletItems.clear();
+  var box = await Hive.openBox("login");
+  box.clear();
+  Get.offAll(() => const LoginScreen());
+}
+
 List getList(String label) {
   final controller = PalletGetController.palletController;
   switch (label) {
@@ -40,6 +61,8 @@ List getList(String label) {
       return controller.variants;
     case 'Drop':
       return controller.dropLocationsList;
+    case 'Order':
+      return controller.orderList;
     default:
       return [];
   }

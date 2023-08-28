@@ -61,10 +61,19 @@ class Webservices {
   }
 
   //API Method to fetch Master Data
-  Future<MasterData?> fetchMaster() async {
+  Future<MasterData?> fetchMaster(bool create) async {
     try {
-      Response res = await dio
-          .post("process/pallets/create", data: {"token": secutiyCode});
+      String url = '';
+      if (GlobalVariables.user?.role == "FG_PALLET_CREATION") {
+        url = "process/pallets/create/box-details";
+      } else {
+        if (create) {
+          url = "process/pallets/create";
+        } else {
+          url = "process/pallets/return/create";
+        }
+      }
+      Response res = await dio.post(url, data: {"token": secutiyCode});
       if (res.data.containsKey("error")) {
         g.Get.snackbar("Failed!!", "${res.data["error"]}",
             colorText: Colors.white);
@@ -243,6 +252,7 @@ class Webservices {
       Response res = await dio
           .post("process/reach-truck/get-pallet-for-reach-truck", data: body);
       final data = RtPalletModel.fromJson(res.data);
+      log("${res.data}");
       return data;
     } on DioException catch (d) {
       if (d.response != null) {
@@ -264,6 +274,7 @@ class Webservices {
   Future<bool> storeRTDetail(Map<String, dynamic> body) async {
     try {
       body.addAll({"token": secutiyCode});
+      log("\nPayload:-\n$body");
       Response res = await dio.post("process/reach-truck/store", data: body);
       log("${res.data}");
       log("${res.statusCode}");

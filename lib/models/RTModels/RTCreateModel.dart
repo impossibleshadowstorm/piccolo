@@ -4,10 +4,10 @@
 
 import 'dart:convert';
 
+import 'package:piccolo/models/MasterDataModel.dart';
+
 RtCreateModel rtCreateModelFromJson(String str) =>
     RtCreateModel.fromJson(json.decode(str));
-
-String rtCreateModelToJson(RtCreateModel data) => json.encode(data.toJson());
 
 class RtCreateModel {
   Data? data;
@@ -19,10 +19,6 @@ class RtCreateModel {
   factory RtCreateModel.fromJson(Map<String, dynamic> json) => RtCreateModel(
         data: json["data"] == null ? null : Data.fromJson(json["data"]),
       );
-
-  Map<String, dynamic> toJson() => {
-        "data": data?.toJson(),
-      };
 }
 
 class Data {
@@ -55,20 +51,6 @@ class Data {
             : List<ToLocation>.from(
                 json["toLocations"]!.map((x) => ToLocation.fromJson(x))),
       );
-
-  Map<String, dynamic> toJson() => {
-        "reachTrucks": reachTrucks == null
-            ? []
-            : List<dynamic>.from(reachTrucks!.map((x) => x)),
-        "fromLocations": fromLocations == null
-            ? []
-            : List<dynamic>.from(fromLocations!.map((x) => x.toJson())),
-        "fromLocationType": fromLocationType,
-        "toLocationType": toLocationType,
-        "toLocations": toLocations == null
-            ? []
-            : List<dynamic>.from(toLocations!.map((x) => x.toJson())),
-      };
 }
 
 class FromLocation {

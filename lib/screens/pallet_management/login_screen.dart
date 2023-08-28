@@ -5,14 +5,14 @@ import 'package:get/get.dart';
 import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/common/widgets/buttons.dart';
 import 'package:piccolo/constants.dart';
-import 'package:piccolo/screens/pallet_management/manage_screen.dart';
-import 'package:piccolo/screens/reach_truck/rt_jobs_pending.dart';
 import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:wc_form_validators/wc_form_validators.dart';
 
 import '../../controller/PalletGetController.dart';
 import '../finished_goods/finished_goods_manage_screen.dart';
+import '../reach_truck/rt_jobs_pending.dart';
+import 'manage_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,10 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final controller = PalletGetController.palletController;
 
   Future<void> fetchMasterDate() async {
-    await webservices.fetchMaster().then((value) {
+    await webservices.fetchMaster(false).then((value) {
       if (value != null) {
         controller.locationsList.value = value.data?.locations ?? [];
         controller.masterPallets.value = value.data?.masterPallets ?? [];
+        controller.orderList.value = value.data?.order ?? [];
         controller.skuCodes.value = value.data?.skuCodes ?? [];
         controller.variants.value = value.data?.variants ?? [];
         controller.maxWeightForContainer.value =
@@ -186,28 +187,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                   webservices
                                       .loginUser(email.text, password.text)
                                       .then((value) async {
-                                    await fetchMasterDate().whenComplete(() {
-                                      progressDialog.dismiss();
-                                      if (value != null) {
-                                        // if (value.data?.role ==
-                                        //     "PALLET_CREATION") {
-                                        //   Get.offAll(
-                                        //       () => const ManageScreen());
-                                        // }
-                                        // else
-                                        if (value.data?.role == "REACH_TRUCK") {
-                                          Get.offAll(
-                                              () => RTJobsPendingScreen());
-                                        }
-
-                                        // else
-                                        // if (value.data?.role ==
-                                        //     "FG_PALLET_CREATION") {
-                                        //   Get.offAll(() =>
-                                        //       const FinishedGoodsManageScreen());
-                                        // }
+                                    progressDialog.dismiss();
+                                    if (value != null) {
+                                      // if (value.data?.role ==
+                                      //     "PALLET_CREATION") {
+                                      //   // fetchMasterDate().whenComplete(() {
+                                      //   Get.offAll(() => const ManageScreen());
+                                      //   //  });
+                                      // }
+                                      //  else
+                                      if (value.data?.role == "REACH_TRUCK") {
+                                        controller.locationsList.clear();
+                                        //    fetchMasterDate().whenComplete(() {
+                                        Get.offAll(() => RTJobsPendingScreen());
+                                        //   });
                                       }
-                                    });
+                                      //else if (value.data?.role ==
+                                      //     "FG_PALLET_CREATION") {
+                                      //   fetchMasterDate().whenComplete(() {
+                                      //     Get.offAll(() =>
+                                      //         const FinishedGoodsManageScreen());
+                                      //   });
+                                      // }
+                                    }
                                   });
                                 }
                               },

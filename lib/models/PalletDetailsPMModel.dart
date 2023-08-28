@@ -25,28 +25,29 @@ class PalletDetail {
   String? weight;
   String? batch;
   String? mappedWeight;
+  int? mappedWeightVal;
 
-  PalletDetail({
-    this.id,
-    this.skuCodeId,
-    this.skuCodeName,
-    this.variantId,
-    this.variantName,
-    this.weight,
-    this.batch,
-    this.mappedWeight,
-  });
+  PalletDetail(
+      {this.id,
+      this.skuCodeId,
+      this.skuCodeName,
+      this.variantId,
+      this.variantName,
+      this.weight,
+      this.batch,
+      this.mappedWeight,
+      this.mappedWeightVal});
 
   factory PalletDetail.fromJson(Map<String, dynamic> json) => PalletDetail(
-        id: num.tryParse(json['id'].toString()),
-        skuCodeId: num.tryParse(json['sku_code_id'].toString()),
-        skuCodeName: json['sku_code_name']?.toString(),
-        variantId: num.tryParse(json['variant_id'].toString()),
-        variantName: json['variant_name']?.toString(),
-        weight: json['weight']?.toString(),
-        batch: json['batch']?.toString(),
-        mappedWeight: json['mapped_weight']?.toString(),
-      );
+      id: num.tryParse(json['id'].toString()),
+      skuCodeId: num.tryParse(json['sku_code_id'].toString()),
+      skuCodeName: json['sku_code_name']?.toString(),
+      variantId: num.tryParse(json['variant_id'].toString()),
+      variantName: json['variant_name']?.toString(),
+      weight: json['weight']?.toString(),
+      batch: json['batch']?.toString(),
+      mappedWeight: json['mapped_weight']?.toString(),
+      mappedWeightVal: json["mapped_weight_value"]);
 
   Map<String, dynamic> toJson() => {
         if (id != null) 'id': id,

@@ -27,12 +27,13 @@ class _SplashScreenState extends State<SplashScreen> {
   final Webservices _webservices = Webservices();
 
   Future<void> fetchMasterDate() async {
-    await _webservices.fetchMaster().then((value) {
+    await _webservices.fetchMaster(false).then((value) {
       if (value != null) {
         controller.locationsList.value = value.data?.locations ?? [];
         controller.masterPallets.value = value.data?.masterPallets ?? [];
         controller.skuCodes.value = value.data?.skuCodes ?? [];
         controller.variants.value = value.data?.variants ?? [];
+        controller.orderList.value = value.data?.order ?? [];
         controller.maxWeightForContainer.value =
             value.data?.maxWeightForContainer ?? 0;
         controller.maxWeightForPallet.value =
@@ -52,17 +53,21 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (data?.id != null) {
         GlobalVariables.user = data;
-
         // if (data?.role == "PALLET_CREATION") {
-        //   fetchMasterDate().whenComplete(() {
-        //     Get.offAll(() => const ManageScreen());
-        //   });
-        // } else
+        //   //fetchMasterDate().whenComplete(() {
+        //   Get.offAll(() => const ManageScreen());
+        //   //  });
+        // }
+        // else
         if (data?.role == "REACH_TRUCK") {
+          //   // fetchMasterDate().whenComplete(() {
           Get.offAll(() => RTJobsPendingScreen());
+          //   //  });
         }
         // else if (data?.role == "FG_PALLET_CREATION") {
-        //   Get.offAll(() => const FinishedGoodsManageScreen());
+        //   await fetchMasterDate().whenComplete(() {
+        //     Get.offAll(() => const FinishedGoodsManageScreen());
+        //   });
         // }
         return;
       }

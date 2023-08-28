@@ -304,11 +304,15 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                   controller.listOfPalletItems[index].weight ??
                                       "0.0"),
                             ),
-                        separatorBuilder: (context, index) => Divider(
-                              height: 5.h,
-                              color: Colors.white,
-                              thickness: 2,
-                            ),
+                        separatorBuilder: (context, index) => controller
+                                    .listOfPalletItems[index].mappedWeightVal ==
+                                0
+                            ? const SizedBox()
+                            : Divider(
+                                height: 5.h,
+                                color: Colors.white,
+                                thickness: 2,
+                              ),
                         itemCount: controller.listOfPalletItems.length),
                   ),
                   Divider(
@@ -362,129 +366,180 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 100.w,
-      padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-      child: Row(
-        children: [
-          Expanded(
+    return controller.listOfPalletItems[widget.index].mappedWeightVal == 0
+        ? const SizedBox()
+        : Container(
+            width: 100.w,
+            padding: EdgeInsets.symmetric(horizontal: 1.5.w),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w300,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                          Text(
+                            "VAR: ${controller.listOfPalletItems[widget.index].variantName}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                          Obx(
+                            () => Text(
+                              "WEIGHT: ${controller.listOfPalletItems[widget.index].weight}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(horizontal: 2.0.w),
+                          width: double.infinity,
+                          child: TextFormField(
+                            readOnly: (num.parse(controller
+                                            .listOfPalletItems[widget.index]
+                                            .weight
+                                            .toString()) -
+                                        num.parse(controller
+                                            .listOfPalletItems[widget.index]
+                                            .mappedWeightVal
+                                            .toString())) ==
+                                    0 ||
+                                controller.listOfPalletItems[widget.index]
+                                        .mappedWeightVal ==
+                                    0,
+                            keyboardType: TextInputType.number,
+                            obscureText: false,
+                            controller: weight,
+                            onChanged: (val) {
+                              if (val.isNotEmpty) {
+                                // num tempVal = num.tryParse(val) ?? 0.0;
+                                // // controller.listOfPalletItems[widget.index].weight =
+                                // //     val;
+                                // setState(() {});
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter weight';
+                              }
+                              final number = num.tryParse(value);
+                              if (number == null) {
+                                return 'Please enter a valid number';
+                              } else if (number >
+                                  (num.parse(controller
+                                          .listOfPalletItems[widget.index]
+                                          .weight
+                                          .toString()) -
+                                      num.parse(controller
+                                          .listOfPalletItems[widget.index]
+                                          .mappedWeightVal
+                                          .toString()))) {
+                                return 'enter weight less than ${(number - num.parse(controller.listOfPalletItems[widget.index].mappedWeightVal.toString()))}';
+                              }
+                              return null;
+                            },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            decoration: InputDecoration(
+                                fillColor: Colors.white,
+                                filled: true,
+                                hintText: "Weight",
+                                hintStyle: TextStyle(
+                                    color: Colors.black, fontSize: 17.0.sp),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 5.w),
+                                border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(3.0.w))),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DefaultBtn(
+                        kolor: Constants.primaryOrangeColor,
+                        label: "Remove",
+                        onTap: () {
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.question,
+                            animType: AnimType.rightSlide,
+                            title: 'Alert!!!',
+                            body: Column(
+                              children: [
+                                Text(
+                                  "Remove?",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18.0.sp,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  'SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 17.0.sp,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ],
+                            ),
+                            btnCancelOnPress: () {},
+                            btnOkOnPress: () {
+                              controller.listOfPalletItems
+                                  .removeAt(widget.index);
+                            },
+                          ).show();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  "VAR: ${controller.listOfPalletItems[widget.index].variantName}",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                Obx(
-                  () => Text(
-                    "WEIGHT: ${controller.listOfPalletItems[widget.index].weight}",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w300,
+                Visibility(
+                  visible: !(controller
+                          .listOfPalletItems[widget.index].mappedWeightVal ==
+                      0),
+                  child: Container(
+                    margin: EdgeInsets.only(top: 2.0.h),
+                    child: Text(
+                      "${controller.listOfPalletItems[widget.index].mappedWeight}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
-          ),
-          Expanded(
-            child: Center(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 2.0.w),
-                width: double.infinity,
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  obscureText: false,
-                  controller: weight,
-                  onChanged: (val) {
-                    if (val.isNotEmpty) {
-                      num tempVal = num.tryParse(val) ?? 0.0;
-                      controller.listOfPalletItems[widget.index].weight = val;
-                      setState(() {});
-                    }
-                  },
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return 'Please enter weight';
-                  //   }
-                  //   final number = int.tryParse(value);
-                  //   if (number == null) {
-                  //     return 'Please enter a valid number';
-                  //   }
-                  //   return null;
-                  // },
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: InputDecoration(
-                      fillColor: Colors.white,
-                      filled: true,
-                      hintText: "Weight",
-                      hintStyle:
-                          TextStyle(color: Colors.black, fontSize: 17.0.sp),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 5.w),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(3.0.w))),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: DefaultBtn(
-              kolor: Constants.primaryOrangeColor,
-              label: "Remove",
-              onTap: () {
-                AwesomeDialog(
-                  context: context,
-                  dialogType: DialogType.question,
-                  animType: AnimType.rightSlide,
-                  title: 'Alert!!!',
-                  body: Column(
-                    children: [
-                      Text(
-                        "Remove?",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18.0.sp,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 17.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                    ],
-                  ),
-                  btnCancelOnPress: () {},
-                  btnOkOnPress: () {
-                    controller.listOfPalletItems.removeAt(widget.index);
-                  },
-                ).show();
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 }

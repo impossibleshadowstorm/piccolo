@@ -95,22 +95,6 @@ class _FinishedGoodsOrderScreenState extends State<FinishedGoodsOrderScreen> {
                             );
                           }),
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          fixedSize: Size(90.0.w, 6.0.h),
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(3.0.w))),
-                      child: Text(
-                        "Confirm",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17.0.sp,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(height: 2.5.h),
                   ],
                 ),
               ),

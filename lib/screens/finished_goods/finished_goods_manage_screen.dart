@@ -96,9 +96,7 @@ class _FinishedGoodsManageScreenState extends State<FinishedGoodsManageScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      var box = await Hive.openBox("login");
-                      box.clear();
-                      Get.offAll(() => const LoginScreen());
+                      logout();
                     },
                     child: Text(
                       " Logout?",
