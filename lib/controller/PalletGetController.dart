@@ -11,6 +11,7 @@ class PalletGetController extends GetxController {
   var maxWeightForContainer = 0.obs;
   var maxWeightForPallet = 0.obs;
   var listOfPalletItems = <PalletDetail>[].obs;
+  var listOfPalletItemsAPI = [].obs;
 
   static PalletGetController get palletController =>
       Get.find<PalletGetController>();

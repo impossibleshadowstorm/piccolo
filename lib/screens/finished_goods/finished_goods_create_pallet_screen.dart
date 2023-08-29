@@ -5,7 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:ndialog/ndialog.dart';
+import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
+import 'package:piccolo/models/FGModels/BoxListModel.dart';
+import 'package:piccolo/models/PalletDetailsPMModel.dart';
+import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:wc_form_validators/wc_form_validators.dart';
 import '../../common/widgets/DefaultBtn.dart';
@@ -25,6 +31,8 @@ class FinishedGoodsCreatePalletScreen extends StatefulWidget {
 
 class _FinishedGoodsCreatePalletScreenState
     extends State<FinishedGoodsCreatePalletScreen> {
+  BoxListModel? palletDetails;
+  final Webservices _webservices = Webservices();
   Location? selectedLocation;
   MasterPallet? selectedPallet;
   Orders? selectedOrder;
@@ -41,6 +49,56 @@ class _FinishedGoodsCreatePalletScreenState
 
   String dropdownValue1 = 'Box No.';
   List<String> options1 = ['Box No.', 'Option 2', 'Option 3'];
+
+  Future<void> storePallet(bool loading, bool warehouse) async {
+    if (listOfBoxes.isEmpty) {
+      Fluttertoast.showToast(msg: "Please fill pallet first");
+    } else {
+      CustomProgressDialog progressDialog =
+          // ignore: use_build_context_synchronously
+          CustomProgressDialog(
+        context,
+        blur: 10,
+        dismissable: false,
+        onDismiss: () => log("Do something onDismiss"),
+      );
+      progressDialog.show();
+      List<Map<String, dynamic>> list = [];
+      for (var element in listOfBoxes) {
+        list.add({
+          "id": element["id"],
+          "box_name": "${selectedOrder?.name}-${element["boxNo"]}"
+        });
+      }
+      Map<String, dynamic> body = {
+        "location_id": selectedLocation?.id,
+        "master_pallet_id": selectedPallet?.id,
+        "updated_by": GlobalVariables.user?.id,
+        "is_request_for_warehouse": warehouse,
+        "is_request_for_loading": loading,
+        "pallet_box_details": list,
+        "order_id": selectedOrder?.id
+      };
+      log("\n$body");
+      if (palletDetails?.data?.id != null) {
+        await _webservices
+            .updateFGPallet(body, palletDetails?.data?.id ?? -1)
+            .then((value) {
+          progressDialog.dismiss();
+          if (value) {
+            Get.back();
+          }
+        });
+      } else {
+        await _webservices.storePallet(body).then((value) {
+          progressDialog.dismiss();
+          if (value) {
+            Get.back();
+          }
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,26 +124,31 @@ class _FinishedGoodsCreatePalletScreenState
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0.w),
-            child: Row(
-              children: [
-                Text(
-                  "Save",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17.0.sp,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  width: 1.5.w,
-                ),
-                Icon(
-                  Icons.save_outlined,
-                  color: Colors.white,
-                  size: 22.sp,
-                )
-              ],
+          GestureDetector(
+            onTap: () {
+              storePallet(false, false);
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5.0.w),
+              child: Row(
+                children: [
+                  Text(
+                    "Save",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17.0.sp,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 1.5.w,
+                  ),
+                  Icon(
+                    Icons.save_outlined,
+                    color: Colors.white,
+                    size: 22.sp,
+                  )
+                ],
+              ),
             ),
           )
         ],
@@ -109,17 +172,19 @@ class _FinishedGoodsCreatePalletScreenState
                           noIcon: false,
                           icon: Icons.search,
                           label: selectedLocation?.name ?? "Search Location",
-                          ontap: () async {
-                            Location? locationVal = await Get.to<dynamic>(
-                                () => const ChooseSKUScreen(
-                                      type: "Location",
-                                    ));
+                          ontap: listOfBoxes.isNotEmpty
+                              ? () {}
+                              : () async {
+                                  Location? locationVal = await Get.to<dynamic>(
+                                      () => const ChooseSKUScreen(
+                                            type: "Location",
+                                          ));
 
-                            if (locationVal != null) {
-                              selectedLocation = locationVal;
-                            }
-                            setState(() {});
-                          },
+                                  if (locationVal != null) {
+                                    selectedLocation = locationVal;
+                                  }
+                                  setState(() {});
+                                },
                         ),
                         SizedBox(height: 2.h),
                         Row(
@@ -129,23 +194,80 @@ class _FinishedGoodsCreatePalletScreenState
                                 noIcon: true,
                                 icon: Icons.search,
                                 label: selectedPallet?.name ?? "Search Pallet",
-                                ontap: () async {
-                                  if (selectedLocation == null) {
-                                    Fluttertoast.showToast(
-                                        msg: "Please select location first!");
-                                  } else {
-                                    MasterPallet? locationVal =
-                                        await Get.to<dynamic>(
-                                            () => const ChooseSKUScreen(
-                                                  type: "Pallet",
-                                                ));
-                                    if (locationVal != null) {
-                                      setState(() {
-                                        selectedPallet = locationVal;
-                                      });
-                                    }
-                                  }
-                                },
+                                ontap: listOfBoxes.isNotEmpty
+                                    ? () {}
+                                    : () async {
+                                        if (selectedLocation == null) {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  "Please select location first!");
+                                        } else {
+                                          MasterPallet? locationVal =
+                                              await Get.to<dynamic>(
+                                                  () => const ChooseSKUScreen(
+                                                        type: "Pallet",
+                                                      ));
+                                          if (locationVal != null) {
+                                            CustomProgressDialog
+                                                progressDialog =
+                                                // ignore: use_build_context_synchronously
+                                                CustomProgressDialog(
+                                              context,
+                                              blur: 10,
+                                              dismissable: false,
+                                              onDismiss: () =>
+                                                  log("Do something onDismiss"),
+                                            );
+                                            progressDialog.show();
+                                            listOfBoxes.clear();
+                                            _webservices
+                                                .getBoxList(locationVal.name!)
+                                                .then((value) {
+                                              progressDialog.dismiss();
+                                              palletDetails = value;
+                                              selectedPallet = locationVal;
+                                              if (value != null) {
+                                                var orderIndex = controller
+                                                    .orderList
+                                                    .indexWhere((element) =>
+                                                        element.id ==
+                                                        value.data?.orderId);
+                                                if (orderIndex != -1) {
+                                                  selectedOrder = controller
+                                                      .orderList[orderIndex];
+                                                }
+                                                var indexLoc = controller
+                                                    .locationsList
+                                                    .firstWhere((element) =>
+                                                        element.name ==
+                                                        palletDetails?.data
+                                                            ?.palletLastLocation);
+                                                selectedLocation = indexLoc;
+
+                                                //
+                                                //
+                                                palletDetails
+                                                    ?.data?.palletBoxDetails
+                                                    ?.forEach((element) {
+                                                  listOfBoxes.add({
+                                                    "id": element.id,
+                                                    "boxNo": element.boxName
+                                                        ?.split("-")
+                                                        .last,
+                                                    "order": element.boxName
+                                                  });
+                                                });
+
+                                                //
+                                                //
+                                              } else {
+                                                listOfBoxes.clear();
+                                              }
+                                              setState(() {});
+                                            });
+                                          }
+                                        }
+                                      },
                               ),
                             ),
                             SizedBox(width: 5.w),
@@ -206,25 +328,28 @@ class _FinishedGoodsCreatePalletScreenState
                           noIcon: false,
                           icon: Icons.search,
                           label: selectedOrder?.name ?? "Choose Order No",
-                          ontap: () async {
-                            if (selectedLocation == null) {
-                              Fluttertoast.showToast(
-                                  msg: "Please select location first!!");
-                            } else if (selectedPallet == null) {
-                              Fluttertoast.showToast(
-                                  msg: "Please select or scan pallet first");
-                            } else {
-                              Orders? locationVal = await Get.to<dynamic>(
-                                  () => const ChooseSKUScreen(
-                                        type: "Order",
-                                      ));
-                              if (locationVal != null) {
-                                setState(() {
-                                  selectedOrder = locationVal;
-                                });
-                              }
-                            }
-                          },
+                          ontap: listOfBoxes.isNotEmpty
+                              ? () {}
+                              : () async {
+                                  if (selectedLocation == null) {
+                                    Fluttertoast.showToast(
+                                        msg: "Please select location first!!");
+                                  } else if (selectedPallet == null) {
+                                    Fluttertoast.showToast(
+                                        msg:
+                                            "Please select or scan pallet first");
+                                  } else {
+                                    Orders? locationVal = await Get.to<dynamic>(
+                                        () => const ChooseSKUScreen(
+                                              type: "Order",
+                                            ));
+                                    if (locationVal != null) {
+                                      setState(() {
+                                        selectedOrder = locationVal;
+                                      });
+                                    }
+                                  }
+                                },
                         ),
                         SizedBox(
                           height: 2.0.h,
@@ -338,13 +463,15 @@ class _FinishedGoodsCreatePalletScreenState
                                   if (_formKey.currentState?.validate() ??
                                       false) {
                                     listOfBoxes.add({
+                                      "id": null,
                                       "boxNo": boxNo.text,
                                       "order":
-                                          "${selectedOrder?.name ?? ""}${boxNo.text}"
+                                          "${selectedOrder?.name ?? ""}-${boxNo.text}"
                                     });
 
                                     setState(() {});
                                     boxNo.clear();
+                                    Get.focusScope?.unfocus();
                                   }
                                 }
                               },
@@ -358,35 +485,45 @@ class _FinishedGoodsCreatePalletScreenState
                                   child: DefaultBtn(
                                     kolor: Colors.red,
                                     label: "Sent to Loading",
-                                    onTap: () {
-                                      AwesomeDialog(
-                                        context: context,
-                                        dialogType: DialogType.question,
-                                        animType: AnimType.rightSlide,
-                                        title: 'Alert!!!',
-                                        body: Column(
-                                          children: [
-                                            Text(
-                                              "Pallet No: 0001",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0.sp,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(
-                                              'This pallet will be moved to loading',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 17.0.sp,
-                                                  fontWeight: FontWeight.w400),
-                                            ),
-                                          ],
-                                        ),
-                                        btnCancelOnPress: () {},
-                                        btnOkOnPress: () {},
-                                      ).show();
-                                    },
+                                    onTap: listOfBoxes.isEmpty
+                                        ? () {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    "Please fill pallet first");
+                                          }
+                                        : () {
+                                            AwesomeDialog(
+                                              context: context,
+                                              dialogType: DialogType.question,
+                                              animType: AnimType.rightSlide,
+                                              title: 'Alert!!!',
+                                              body: Column(
+                                                children: [
+                                                  Text(
+                                                    "Pallet No: ${selectedPallet?.name}",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 18.0.sp,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  Text(
+                                                    'This pallet will be moved to loading',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 17.0.sp,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ],
+                                              ),
+                                              btnCancelOnPress: () {},
+                                              btnOkOnPress: () {
+                                                storePallet(true, false);
+                                              },
+                                            ).show();
+                                          },
                                   ),
                                 ),
                                 SizedBox(
@@ -396,35 +533,45 @@ class _FinishedGoodsCreatePalletScreenState
                                   child: DefaultBtn(
                                     kolor: Colors.green,
                                     label: "Sent to WH",
-                                    onTap: () {
-                                      AwesomeDialog(
-                                        context: context,
-                                        dialogType: DialogType.question,
-                                        animType: AnimType.rightSlide,
-                                        title: 'Alert!!!',
-                                        body: Column(
-                                          children: [
-                                            Text(
-                                              "Pallet No: 0001",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0.sp,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(
-                                              "This pallet will be moved to warehouse",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 17.0.sp,
-                                                  fontWeight: FontWeight.w400),
-                                            ),
-                                          ],
-                                        ),
-                                        btnCancelOnPress: () {},
-                                        btnOkOnPress: () {},
-                                      ).show();
-                                    },
+                                    onTap: listOfBoxes.isEmpty
+                                        ? () {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    "Please fill pallet first");
+                                          }
+                                        : () {
+                                            AwesomeDialog(
+                                              context: context,
+                                              dialogType: DialogType.question,
+                                              animType: AnimType.rightSlide,
+                                              title: 'Alert!!!',
+                                              body: Column(
+                                                children: [
+                                                  Text(
+                                                    "Pallet No: ${selectedPallet?.name}",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 18.0.sp,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  Text(
+                                                    "This pallet will be moved to warehouse",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 17.0.sp,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ],
+                                              ),
+                                              btnCancelOnPress: () {},
+                                              btnOkOnPress: () {
+                                                storePallet(false, true);
+                                              },
+                                            ).show();
+                                          },
                                   ),
                                 ),
                               ],

@@ -53,21 +53,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (data?.id != null) {
         GlobalVariables.user = data;
-        // if (data?.role == "PALLET_CREATION") {
-        //   //fetchMasterDate().whenComplete(() {
-        //   Get.offAll(() => const ManageScreen());
-        //   //  });
+        if (data?.role == "PALLET_CREATION") {
+          //fetchMasterDate().whenComplete(() {
+          Get.offAll(() => const ManageScreen());
+          //  });
+        }
+        // else
+        // if (data?.role == "REACH_TRUCK") {
+        //   //   // fetchMasterDate().whenComplete(() {
+        //   Get.offAll(() => RTJobsPendingScreen());
+        //   //   //  });
         // }
         // else
-        if (data?.role == "REACH_TRUCK") {
-          //   // fetchMasterDate().whenComplete(() {
-          Get.offAll(() => RTJobsPendingScreen());
-          //   //  });
-        }
-        // else if (data?.role == "FG_PALLET_CREATION") {
-        //   await fetchMasterDate().whenComplete(() {
-        //     Get.offAll(() => const FinishedGoodsManageScreen());
-        //   });
+        // if (data?.role == "FG_PALLET_CREATION") {
+        //   Get.offAll(() => const FinishedGoodsManageScreen());
         // }
         return;
       }

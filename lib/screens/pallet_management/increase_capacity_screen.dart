@@ -218,7 +218,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             ontap: pList.isNotEmpty && selectedPallet != null
                                 ? () {
                                     Fluttertoast.showToast(
-                                        msg: "Cannott change pallet");
+                                        msg: "Cannot change pallet");
                                   }
                                 : () async {
                                     MasterPallet? locationVal =
@@ -426,7 +426,13 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         kolor: Constants.primaryOrangeColor,
                         label: "Add",
                         onTap: () {
-                          if (selectedSKU == null) {
+                          if (selectedLocation == null) {
+                            Fluttertoast.showToast(
+                                msg: "Please select location first");
+                          } else if (selectedPallet == null) {
+                            Fluttertoast.showToast(
+                                msg: "Please select Pallet first");
+                          } else if (selectedSKU == null) {
                             Fluttertoast.showToast(msg: "Please select SKU");
                           } else if (selectedVariant == null) {
                             Fluttertoast.showToast(

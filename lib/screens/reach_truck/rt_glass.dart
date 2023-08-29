@@ -40,6 +40,7 @@ class _RTGlassState extends State<RTGlass> {
   bool palletMatch = false;
   bool palletScanned = true;
   bool dropdownDisable = false;
+  bool disableDrop = false;
   String? selectedDrop;
   List<String> palletItems = ["Pallet No. 1", "Pallet No. 2", "Pallet No. 3"];
   List<String> dropItems = ["Drop No. 1", "Drop No. 2", "Drop No. 3"];
@@ -61,6 +62,23 @@ class _RTGlassState extends State<RTGlass> {
       }
       setState(() {});
     });
+  }
+
+  void checkContainer() {
+    try {
+      if (dropdownValue?[0] == "C") {
+        for (var element in controller.dropLocationsList) {
+          if (element.name.toLowerCase() == "general") {
+            setState(() {
+              selectedToLocation = element;
+              disableDrop = true;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      log("Fatal Error in Check Contanier ${e.toString()}");
+    }
   }
 
   void setDrop() {
@@ -234,7 +252,14 @@ class _RTGlassState extends State<RTGlass> {
                               setState(() {
                                 dropdownValue = newValue!;
                               });
-                              setDrop();
+                              if (widget.label == "GLASS" ||
+                                  widget.label == "CERAMIC" ||
+                                  widget.label == "RECYCLE" ||
+                                  widget.label == "ASSEMBLY LINE TO WH") {
+                                checkContainer();
+                              } else {
+                                setDrop();
+                              }
                             },
                             items: options
                                 .map<DropdownMenuItem<String>>((String value) {
@@ -308,26 +333,29 @@ class _RTGlassState extends State<RTGlass> {
                           noIcon: false,
                           icon: Icons.search,
                           label: selectedToLocation?.name ?? "Search Drop",
-                          ontap: () async {
-                            if (selectedFromLocation == null) {
-                              Fluttertoast.showToast(
-                                  msg: "Please select pickup location first");
-                            } else if (dropdownValue == null) {
-                              Fluttertoast.showToast(
-                                  msg: "Please select pallet");
-                            } else {
-                              if (dropdownDisable) {
-                              } else {
-                                ToLocation? val = await Get.to<dynamic>(
-                                    () => const ChooseSKUScreen(
-                                          type: "Drop",
-                                        ));
+                          ontap: disableDrop
+                              ? () {}
+                              : () async {
+                                  if (selectedFromLocation == null) {
+                                    Fluttertoast.showToast(
+                                        msg:
+                                            "Please select pickup location first");
+                                  } else if (dropdownValue == null) {
+                                    Fluttertoast.showToast(
+                                        msg: "Please select pallet");
+                                  } else {
+                                    if (dropdownDisable) {
+                                    } else {
+                                      ToLocation? val = await Get.to<dynamic>(
+                                          () => const ChooseSKUScreen(
+                                                type: "Drop",
+                                              ));
 
-                                selectedToLocation = val;
-                                setState(() {});
-                              }
-                            }
-                          },
+                                      selectedToLocation = val;
+                                      setState(() {});
+                                    }
+                                  }
+                                },
                         ),
                       ),
                       SizedBox(

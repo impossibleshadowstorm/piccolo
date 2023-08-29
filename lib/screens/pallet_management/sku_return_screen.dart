@@ -33,6 +33,8 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
   PalletDetailsPm? palletDetails;
   List<PalletDetail> listPallets = [];
   List<Map<String, dynamic>> pList = [];
+  List<Map<String, dynamic>> apiTempList = [];
+
   final Webservices _webservices = Webservices();
   num totalWeight = 0;
   int lenght = 4;
@@ -60,70 +62,70 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          GestureDetector(
-            onTap: () async {
-              //log(body.toString(), name: "Body+");
-              CustomProgressDialog progressDialog =
-                  // ignore: use_build_context_synchronously
-                  CustomProgressDialog(
-                context,
-                blur: 10,
-                dismissable: true,
-                onDismiss: () => log("Do something onDismiss"),
-              );
-              progressDialog.show();
-              List<Map<String, dynamic>> tempList = [];
-              for (var element in controller.listOfPalletItems) {
-                String formattedDateActual =
-                    DateFormat('yyyy-MM-dd').format(DateTime.now());
-                tempList.add({
-                  "id": element.id,
-                  "sku_code_id": element.skuCodeId,
-                  "variant_id": element.variantId,
-                  "weight": num.tryParse(element.weight ?? "0.0"),
-                  "batch": element.batch,
-                  "batch_date": formattedDateActual
-                });
-              }
-              Map<String, dynamic> body = {
-                "location_id": selectedLocation?.id,
-                "master_pallet_id": selectedPallet?.id,
-                "updated_by": GlobalVariables.user?.id,
-                "is_request_for_warehouse": true,
-                "pallet_details": tempList
-              };
-              await _webservices
-                  .updatePallet(body, palletDetails?.data?.id?.toInt() ?? -1)
-                  .then((value) {
-                progressDialog.dismiss();
-                if (value) {
-                  Get.back();
-                }
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5.0.w),
-              child: Row(
-                children: [
-                  Text(
-                    "Save",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17.0.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    width: 1.5.w,
-                  ),
-                  Icon(
-                    Icons.save_outlined,
-                    color: Colors.white,
-                    size: 22.sp,
-                  )
-                ],
-              ),
-            ),
-          )
+          // GestureDetector(
+          //   onTap: () async {
+          //     //log(body.toString(), name: "Body+");
+          //     CustomProgressDialog progressDialog =
+          //         // ignore: use_build_context_synchronously
+          //         CustomProgressDialog(
+          //       context,
+          //       blur: 10,
+          //       dismissable: true,
+          //       onDismiss: () => log("Do something onDismiss"),
+          //     );
+          //     progressDialog.show();
+          //     List<Map<String, dynamic>> tempList = [];
+          //     for (var element in controller.listOfPalletItems) {
+          //       String formattedDateActual =
+          //           DateFormat('yyyy-MM-dd').format(DateTime.now());
+          //       tempList.add({
+          //         "id": element.id,
+          //         "sku_code_id": element.skuCodeId,
+          //         "variant_id": element.variantId,
+          //         "weight": num.tryParse(element.weight ?? "0.0"),
+          //         "batch": element.batch,
+          //         "batch_date": formattedDateActual
+          //       });
+          //     }
+          //     Map<String, dynamic> body = {
+          //       "location_id": selectedLocation?.id,
+          //       "master_pallet_id": selectedPallet?.id,
+          //       "updated_by": GlobalVariables.user?.id,
+          //       "is_request_for_warehouse": true,
+          //       "pallet_details": tempList
+          //     };
+          //     await _webservices
+          //         .updatePallet(body, palletDetails?.data?.id?.toInt() ?? -1)
+          //         .then((value) {
+          //       progressDialog.dismiss();
+          //       if (value) {
+          //         Get.back();
+          //       }
+          //     });
+          //   },
+          //   child: Container(
+          //     padding: EdgeInsets.symmetric(horizontal: 5.0.w),
+          //     child: Row(
+          //       children: [
+          //         Text(
+          //           "Save",
+          //           style: TextStyle(
+          //               color: Colors.white,
+          //               fontSize: 17.0.sp,
+          //               fontWeight: FontWeight.bold),
+          //         ),
+          //         SizedBox(
+          //           width: 1.5.w,
+          //         ),
+          //         Icon(
+          //           Icons.save_outlined,
+          //           color: Colors.white,
+          //           size: 22.sp,
+          //         )
+          //       ],
+          //     ),
+          //   ),
+          // )
         ],
       ),
       backgroundColor: Constants.primaryBackgroundColor,
@@ -201,6 +203,19 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                   controller.listOfPalletItems.clear();
                                   palletDetails?.data?.palletDetails
                                       ?.forEach((element) {
+                                    String formattedDateActual =
+                                        DateFormat('yyyy-MM-dd')
+                                            .format(DateTime.now());
+
+                                    controller.listOfPalletItemsAPI.add({
+                                      "id": element.id,
+                                      "sku_code_id": element.skuCodeId,
+                                      "variant_id": element.variantId,
+                                      "weight":
+                                          num.tryParse(element.weight ?? "0.0"),
+                                      "batch": element.batch,
+                                      "batch_date": formattedDateActual
+                                    });
                                     controller.listOfPalletItems.add(element);
                                     listPallets.add(element);
                                     pList.add({
@@ -261,26 +276,18 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                         onDismiss: () => log("Do something onDismiss"),
                       );
                       progressDialog.show();
-                      List<Map<String, dynamic>> tempList = [];
-                      for (var element in controller.listOfPalletItems) {
-                        String formattedDateActual =
-                            DateFormat('yyyy-MM-dd').format(DateTime.now());
-                        tempList.add({
-                          "id": element.id,
-                          "sku_code_id": element.skuCodeId,
-                          "variant_id": element.variantId,
-                          "weight": num.tryParse(element.weight ?? "0.0"),
-                          "batch": element.batch,
-                          "batch_date": formattedDateActual
-                        });
-                      }
+                      // for (var element in controller.listOfPalletItems) {
+                      //   String formattedDateActual =
+                      //       DateFormat('yyyy-MM-dd').format(DateTime.now());
+                      // }
                       Map<String, dynamic> body = {
                         "location_id": selectedLocation?.id,
                         "master_pallet_id": selectedPallet?.id,
                         "updated_by": GlobalVariables.user?.id,
                         "is_request_for_warehouse": true,
-                        "pallet_details": tempList
+                        "pallet_details": controller.listOfPalletItemsAPI
                       };
+                      log("$body");
                       await _webservices
                           .updatePallet(
                               body, palletDetails?.data?.id?.toInt() ?? -1)
@@ -300,9 +307,10 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                         shrinkWrap: true,
                         itemBuilder: (context, index) => SKUReturnTile(
                               index: index,
-                              weight: num.parse(
-                                  controller.listOfPalletItems[index].weight ??
-                                      "0.0"),
+                              weight: num.tryParse(controller
+                                      .listOfPalletItems[index].mappedWeightVal
+                                      .toString()) ??
+                                  0.0,
                             ),
                         separatorBuilder: (context, index) => controller
                                     .listOfPalletItems[index].mappedWeightVal ==
@@ -355,6 +363,7 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
   final controller = PalletGetController.palletController;
 
   TextEditingController weight = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -371,37 +380,18 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
         : Container(
             width: 100.w,
             padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                          Text(
-                            "VAR: ${controller.listOfPalletItems[widget.index].variantName}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                          Obx(
-                            () => Text(
-                              "WEIGHT: ${controller.listOfPalletItems[widget.index].weight}",
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -410,135 +400,230 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
                                 fontWeight: FontWeight.w300,
                               ),
                             ),
-                          )
-                        ],
+                            Text(
+                              "VAR: ${controller.listOfPalletItems[widget.index].variantName}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                            Obx(
+                              () => Text(
+                                "WEIGHT: ${controller.listOfPalletItems[widget.index].weight}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 2.0.w),
-                          width: double.infinity,
-                          child: TextFormField(
-                            readOnly: (num.parse(controller
-                                            .listOfPalletItems[widget.index]
-                                            .weight
-                                            .toString()) -
+                      Expanded(
+                        child: Center(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 2.0.w),
+                            width: double.infinity,
+                            child: TextFormField(
+                              readOnly: (num.parse(controller
+                                              .listOfPalletItems[widget.index]
+                                              .weight
+                                              .toString()) -
+                                          num.parse(controller
+                                              .listOfPalletItems[widget.index]
+                                              .mappedWeightVal
+                                              .toString())) ==
+                                      0 ||
+                                  controller.listOfPalletItems[widget.index]
+                                          .mappedWeightVal ==
+                                      0,
+                              keyboardType: TextInputType.number,
+                              obscureText: false,
+                              controller: weight,
+                              onChanged: (val) {
+                                if (val.isNotEmpty) {
+                                  // num tempVal = num.tryParse(val) ?? 0.0;
+                                  // // controller.listOfPalletItems[widget.index].weight =
+                                  // //     val;
+                                  // setState(() {});
+                                }
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter weight';
+                                }
+                                final number = num.tryParse(value);
+                                if (number == null) {
+                                  return 'Please enter a valid number';
+                                } else if (number >
                                         num.parse(controller
+                                                .listOfPalletItems[widget.index]
+                                                .weight ??
+                                            "$number")
+                                    // (num.parse(controller
+                                    //         .listOfPalletItems[widget.index]
+                                    //         .weight
+                                    //         .toString()) -
+                                    //     num.parse(controller
+                                    //         .listOfPalletItems[widget.index]
+                                    //         .mappedWeightVal
+                                    //         .toString()))
+                                    ) {
+                                  return 'enter weight less than ${(controller.listOfPalletItems[widget.index].weight)}';
+                                  //${(number - num.parse(controller.listOfPalletItems[widget.index].mappedWeightVal.toString()))}';
+                                } else if (number <
+                                    (num.tryParse(controller
                                             .listOfPalletItems[widget.index]
                                             .mappedWeightVal
-                                            .toString())) ==
-                                    0 ||
-                                controller.listOfPalletItems[widget.index]
-                                        .mappedWeightVal ==
-                                    0,
-                            keyboardType: TextInputType.number,
-                            obscureText: false,
-                            controller: weight,
-                            onChanged: (val) {
-                              if (val.isNotEmpty) {
-                                // num tempVal = num.tryParse(val) ?? 0.0;
-                                // // controller.listOfPalletItems[widget.index].weight =
-                                // //     val;
-                                // setState(() {});
-                              }
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter weight';
-                              }
-                              final number = num.tryParse(value);
-                              if (number == null) {
-                                return 'Please enter a valid number';
-                              } else if (number >
-                                  (num.parse(controller
-                                          .listOfPalletItems[widget.index]
-                                          .weight
-                                          .toString()) -
-                                      num.parse(controller
-                                          .listOfPalletItems[widget.index]
-                                          .mappedWeightVal
-                                          .toString()))) {
-                                return 'enter weight less than ${(number - num.parse(controller.listOfPalletItems[widget.index].mappedWeightVal.toString()))}';
-                              }
-                              return null;
-                            },
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                filled: true,
-                                hintText: "Weight",
-                                hintStyle: TextStyle(
-                                    color: Colors.black, fontSize: 17.0.sp),
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 5.w),
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(3.0.w))),
+                                            .toString()) ??
+                                        number)) {
+                                  return 'enter weight more than ${controller.listOfPalletItems[widget.index].mappedWeightVal.toString()}';
+                                }
+                                return null;
+                              },
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              decoration: InputDecoration(
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  hintText: "Weight",
+                                  hintStyle: TextStyle(
+                                      color: Colors.black, fontSize: 17.0.sp),
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 5.w),
+                                  border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(3.0.w))),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: DefaultBtn(
-                        kolor: Constants.primaryOrangeColor,
-                        label: "Remove",
-                        onTap: () {
-                          AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.question,
-                            animType: AnimType.rightSlide,
-                            title: 'Alert!!!',
-                            body: Column(
-                              children: [
-                                Text(
-                                  "Remove?",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18.0.sp,
-                                      fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: DefaultBtn(
+                          kolor: Constants.primaryOrangeColor,
+                          label: "Remove",
+                          onTap: () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.question,
+                                animType: AnimType.rightSlide,
+                                title: 'Alert!!!',
+                                body: Column(
+                                  children: [
+                                    Text(
+                                      "Remove?",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18.0.sp,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 17.0.sp,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  'SKU: ${controller.listOfPalletItems[widget.index].skuCodeName}',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 17.0.sp,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                            btnCancelOnPress: () {},
-                            btnOkOnPress: () {
-                              controller.listOfPalletItems
-                                  .removeAt(widget.index);
-                            },
-                          ).show();
-                        },
+                                btnCancelOnPress: () {},
+                                btnOkOnPress: () {
+                                  if (num.parse(controller
+                                          .listOfPalletItems[widget.index]
+                                          .mappedWeightVal
+                                          .toString()) ==
+                                      num.parse(controller
+                                              .listOfPalletItems[widget.index]
+                                              .weight ??
+                                          "0.0")) {
+                                    controller.listOfPalletItems
+                                        .removeAt(widget.index);
+                                    controller.listOfPalletItemsAPI
+                                        .removeAt(widget.index);
+                                  } else {
+                                    PalletDetail tempPallet = PalletDetail(
+                                        batch: controller
+                                            .listOfPalletItems[widget.index]
+                                            .batch,
+                                        id: null,
+                                        mappedWeight: controller
+                                            .listOfPalletItems[widget.index]
+                                            .mappedWeight,
+                                        mappedWeightVal: controller
+                                            .listOfPalletItems[widget.index]
+                                            .mappedWeightVal,
+                                        skuCodeId: controller
+                                            .listOfPalletItems[widget.index]
+                                            .skuCodeId,
+                                        skuCodeName: controller
+                                            .listOfPalletItems[widget.index]
+                                            .skuCodeName,
+                                        variantId: controller
+                                            .listOfPalletItems[widget.index]
+                                            .variantId,
+                                        variantName: controller
+                                            .listOfPalletItems[widget.index]
+                                            .variantName,
+                                        weight: (num.parse(controller
+                                                        .listOfPalletItems[
+                                                            widget.index]
+                                                        .weight ??
+                                                    "0.0") -
+                                                num.parse(weight.text))
+                                            .toString());
+                                    controller.listOfPalletItemsAPI
+                                        .removeAt(widget.index);
+                                    String formattedDateActual =
+                                        DateFormat('yyyy-MM-dd')
+                                            .format(DateTime.now());
+                                    controller.listOfPalletItemsAPI.add({
+                                      "id": tempPallet.id,
+                                      "sku_code_id": tempPallet.skuCodeId,
+                                      "variant_id": tempPallet.variantId,
+                                      "weight": num.tryParse(
+                                          tempPallet.weight ?? "0.0"),
+                                      "batch": tempPallet.batch,
+                                      "batch_date": formattedDateActual
+                                    });
+                                    controller.listOfPalletItems
+                                        .removeAt(widget.index);
+                                  }
+                                },
+                              ).show();
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Visibility(
-                  visible: !(controller
-                          .listOfPalletItems[widget.index].mappedWeightVal ==
-                      0),
-                  child: Container(
-                    margin: EdgeInsets.only(top: 2.0.h),
-                    child: Text(
-                      "${controller.listOfPalletItems[widget.index].mappedWeight}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  Visibility(
+                    visible: !(controller
+                            .listOfPalletItems[widget.index].mappedWeightVal ==
+                        0),
+                    child: Container(
+                      margin: EdgeInsets.only(top: 2.0.h),
+                      child: Text(
+                        "${controller.listOfPalletItems[widget.index].mappedWeight}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
   }

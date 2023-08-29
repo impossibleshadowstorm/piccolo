@@ -7,10 +7,12 @@ import 'package:get/get.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/models/FGModels/FGOrderListModel.dart';
 import 'package:piccolo/models/MasterDataModel.dart';
 import 'package:piccolo/models/PalletDetailsPMModel.dart';
 import 'package:piccolo/models/RTModels/RTCreateModel.dart';
 
+import '../models/FGModels/BoxListModel.dart';
 import '../models/LoginModel.dart';
 import '../models/RTModels/HomeModel.dart';
 import '../models/RTModels/RTPalletModel.dart';
@@ -140,6 +142,7 @@ class Webservices {
           {"token": secutiyCode, "created_by": GlobalVariables.user?.id});
       Response res = await dio.post("process/pallets/store", data: body);
       Map tempMap = res.data["data"];
+      log("\n${res.data}", name: "storePallet Reponse");
       if (tempMap.containsKey("success")) {
         Fluttertoast.showToast(msg: "${tempMap['success']}");
         return true;
@@ -293,6 +296,123 @@ class Webservices {
     } catch (e) {
       log("Fatal Error in Store RT Details API:- ${e.toString()}",
           name: "storeRTDetail");
+      return false;
+    }
+  }
+
+  //API Method to fetch Pallet Data
+  Future<BoxListModel?> getBoxList(String palletName) async {
+    try {
+      Map<String, dynamic> body = {
+        "token": secutiyCode,
+        "pallet_name": palletName
+      };
+      Response res =
+          await dio.post("process/pallets/get-pallet-details", data: body);
+      if (res.data.containsKey("error")) {
+        g.Get.snackbar("Failed!!", "${res.data["error"]}",
+            colorText: Colors.white);
+        return null;
+      }
+      if (res.data["data"].runtimeType == List) {
+        return null;
+      } else {
+        final responseVal = BoxListModel.fromJson(res.data);
+        return responseVal;
+      }
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Fetch Box From Pallet Details API:- ${e.toString()}",
+          name: "getBoxList");
+      return null;
+    }
+  }
+
+  //API Method to fetch Pallet Data
+  Future<FgOrderListModel?> getFGOrderList() async {
+    try {
+      Map<String, dynamic> body = {
+        "token": secutiyCode,
+      };
+      Response res = await dio.post("orders/get-orders", data: body);
+      final result = FgOrderListModel.fromJson(res.data);
+      return result;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      log("Fatal Error in Fetch Order From FG Pallet Details API:- ${e.toString()}",
+          name: "getFGOrderList");
+      return null;
+    }
+  }
+
+  //API Method to Update Pallet Data
+  Future<bool> updateFGPallet(
+      Map<String, dynamic> body, int masterPalletID) async {
+    try {
+      body.addAll({"token": secutiyCode});
+      Response res =
+          await dio.put("process/pallets/update/$masterPalletID", data: body);
+      Map tempMap = res.data["data"];
+      if (tempMap.containsKey("success")) {
+        Fluttertoast.showToast(msg: "${tempMap['success']}");
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: "Unable to add pallet, please try again later...");
+        return false;
+      }
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      log("Fatal Error in Update Pallet Details API:- ${e.toString()}",
+          name: "updatePallet");
+      return false;
+    }
+  }
+
+  //API Method to Update Pallet Data
+  Future<bool> completeFGOrder(int id) async {
+    try {
+      Response res = await dio
+          .post("orders/update-order-state-as-complete/$id?token=$secutiyCode");
+      List tempMap = res.data["data"];
+      Fluttertoast.showToast(msg: tempMap.first);
+      return true;
+    } on DioException catch (d) {
+      if (d.response != null) {
+        if (d.response?.statusCode == 500) {
+          g.Get.snackbar("Failed!!", "${d.response?.data["error"]}",
+              colorText: Colors.white);
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      log("Fatal Error in Complete FG Order API:- ${e.toString()}",
+          name: "completeFGOrder");
       return false;
     }
   }

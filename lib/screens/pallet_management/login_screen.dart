@@ -189,25 +189,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                       .then((value) async {
                                     progressDialog.dismiss();
                                     if (value != null) {
-                                      // if (value.data?.role ==
-                                      //     "PALLET_CREATION") {
-                                      //   // fetchMasterDate().whenComplete(() {
-                                      //   Get.offAll(() => const ManageScreen());
-                                      //   //  });
-                                      // }
-                                      //  else
-                                      if (value.data?.role == "REACH_TRUCK") {
-                                        controller.locationsList.clear();
-                                        //    fetchMasterDate().whenComplete(() {
-                                        Get.offAll(() => RTJobsPendingScreen());
-                                        //   });
+                                      if (value.data?.role ==
+                                          "PALLET_CREATION") {
+                                        // fetchMasterDate().whenComplete(() {
+                                        Get.offAll(() => const ManageScreen());
+                                        //  });
                                       }
-                                      //else if (value.data?.role ==
+                                      //  else
+                                      // if (value.data?.role == "REACH_TRUCK") {
+                                      //   controller.locationsList.clear();
+                                      //   //    fetchMasterDate().whenComplete(() {
+                                      //   Get.offAll(() => RTJobsPendingScreen());
+                                      //   //   });
+                                      // }
+                                      //else
+                                      // if (value.data?.role ==
                                       //     "FG_PALLET_CREATION") {
-                                      //   fetchMasterDate().whenComplete(() {
-                                      //     Get.offAll(() =>
-                                      //         const FinishedGoodsManageScreen());
-                                      //   });
+                                      //   Get.offAll(() =>
+                                      //       const FinishedGoodsManageScreen());
                                       // }
                                     }
                                   });

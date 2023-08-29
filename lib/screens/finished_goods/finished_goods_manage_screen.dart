@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:piccolo/constants.dart';
+import 'package:piccolo/controller/PalletGetController.dart';
 import 'package:piccolo/screens/finished_goods/finished_goods_create_pallet_screen.dart';
 import 'package:piccolo/screens/finished_goods/finished_goods_order_screen.dart';
+import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../GlobalVariables.dart';
-import '../../common/widgets/buttons.dart';
-import '../pallet_management/login_screen.dart';
 
 class FinishedGoodsManageScreen extends StatefulWidget {
   const FinishedGoodsManageScreen({super.key});
@@ -19,6 +18,26 @@ class FinishedGoodsManageScreen extends StatefulWidget {
 }
 
 class _FinishedGoodsManageScreenState extends State<FinishedGoodsManageScreen> {
+  final Webservices _webservices = Webservices();
+  final controller = PalletGetController.palletController;
+
+  Future<void> fetchMasterDate() async {
+    await _webservices.fetchMaster(false).then((value) {
+      if (value != null) {
+        controller.locationsList.value = value.data?.locations ?? [];
+        controller.masterPallets.value = value.data?.masterPallets ?? [];
+        controller.skuCodes.value = value.data?.skuCodes ?? [];
+        controller.variants.value = value.data?.variants ?? [];
+        controller.orderList.value = value.data?.order ?? [];
+        controller.maxWeightForContainer.value =
+            value.data?.maxWeightForContainer ?? 0;
+        controller.maxWeightForPallet.value =
+            value.data?.maxWeightForPallet ?? 0;
+        return;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
