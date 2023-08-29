@@ -249,19 +249,25 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                               DateFormat('yyyy-MM-dd')
                                                   .format(selectedDate);
                                           var index = controller.masterPallets
-                                              .firstWhere((element) =>
+                                              .indexWhere((element) =>
                                                   element.name ==
                                                   palletDetails
                                                       ?.data?.palletName);
-                                          selectedPallet = index;
+                                          if (index != -1) {
+                                            selectedPallet =
+                                                controller.masterPallets[index];
+                                          }
 
                                           var indexLoc = controller
                                               .locationsList
-                                              .firstWhere((element) =>
+                                              .indexWhere((element) =>
                                                   element.name ==
                                                   palletDetails?.data
                                                       ?.palletLastLocation);
-                                          selectedLocation = indexLoc;
+                                          if (indexLoc != -1) {
+                                            selectedLocation = controller
+                                                .locationsList[indexLoc];
+                                          }
 
                                           //
                                           //
@@ -275,7 +281,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                               "weight": num.tryParse(
                                                   element.weight ?? "0.0"),
                                               "batch": element.batch,
-                                              "batch_date": formattedDateActual
+                                              "batch_date": formattedDateActual,
                                             });
                                             totalWeight = totalWeight +
                                                 num.parse(
@@ -449,37 +455,53 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                     msg:
                                         "Please enter weight less than ${getRemainingWeight()}");
                               } else {
-                                String formattedDate =
-                                    DateFormat('ddMMyyyy').format(selectedDate);
-                                String formattedDateActual =
-                                    DateFormat('yyyy-MM-dd')
-                                        .format(selectedDate);
-                                log(formattedDateActual, name: "Batch Name");
-                                pList.add({
-                                  "id": null,
-                                  "sku_code_id": selectedSKU?.id,
-                                  "variant_id": selectedVariant?.id,
-                                  "weight": num.tryParse(weight.text),
-                                  "batch":
-                                      "${selectedLocation?.abbr}$formattedDate",
-                                  "batch_date": formattedDateActual
-                                });
-                                totalWeight =
-                                    totalWeight + num.parse(weight.text);
-                                listPallets.add(PalletDetail(
-                                    batch:
+                                int tempIndex = listPallets.indexWhere(
+                                    (element) =>
+                                        element.variantId ==
+                                            selectedVariant?.id ||
+                                        element.skuCodeId == selectedSKU?.id);
+                                if (tempIndex == -1) {
+                                  String formattedDate = DateFormat('ddMMyyyy')
+                                      .format(selectedDate);
+                                  String formattedDateActual =
+                                      DateFormat('yyyy-MM-dd')
+                                          .format(selectedDate);
+                                  log(formattedDateActual, name: "Batch Name");
+                                  pList.add({
+                                    "id": null,
+                                    "sku_code_id": selectedSKU?.id,
+                                    "variant_id": selectedVariant?.id,
+                                    "weight": num.tryParse(weight.text),
+                                    "batch":
                                         "${selectedLocation?.abbr}$formattedDate",
-                                    id: null,
-                                    mappedWeight: "",
-                                    skuCodeId: selectedSKU?.id,
-                                    skuCodeName: selectedSKU?.name,
-                                    variantId: selectedVariant?.id,
-                                    variantName: selectedVariant?.name,
-                                    weight: weight.text));
-                                selectedVariant = null;
-                                selectedSKU = null;
-                                weight.clear();
-                                setState(() {});
+                                    "batch_date": formattedDateActual
+                                  });
+                                  totalWeight =
+                                      totalWeight + num.parse(weight.text);
+                                  listPallets.add(PalletDetail(
+                                      batch:
+                                          "${selectedLocation?.abbr}$formattedDate",
+                                      id: null,
+                                      mappedWeight: "",
+                                      skuCodeId: selectedSKU?.id,
+                                      skuCodeName: selectedSKU?.name,
+                                      variantId: selectedVariant?.id,
+                                      variantName: selectedVariant?.name,
+                                      weight: weight.text));
+                                  selectedVariant = null;
+                                  selectedSKU = null;
+                                  weight.clear();
+                                  setState(() {});
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg:
+                                          "SKU / Variant Already Exist in Pallet");
+                                  setState(() {
+                                    selectedSKU = null;
+                                    selectedVariant = null;
+                                    weight.clear();
+                                  });
+                                }
                               }
                             }
                           }
@@ -569,6 +591,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
+                  reverse: false,
                   padding: EdgeInsets.symmetric(horizontal: 5.0.w),
                   physics: const BouncingScrollPhysics(),
                   itemCount: listPallets.length,

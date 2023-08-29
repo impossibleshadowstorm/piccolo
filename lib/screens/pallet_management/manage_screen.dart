@@ -81,6 +81,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       onTap: () {
                         final controller = PalletGetController.palletController;
                         controller.listOfPalletItems.clear();
+                        controller.listOfPalletItemsAPI.clear();
                         fetchMasterDate(false).whenComplete(() {
                           Get.to(() => const SKUReturnScreen());
                         });

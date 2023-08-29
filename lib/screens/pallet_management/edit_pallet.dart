@@ -154,9 +154,11 @@ class _EditPalletState extends State<EditPallet> {
                               await Get.to<dynamic>(() => const ChooseSKUScreen(
                                     type: "SKU",
                                   ));
-                          setState(() {
-                            selectedSKU = locationVal;
-                          });
+                          if (locationVal != null) {
+                            setState(() {
+                              selectedSKU = locationVal;
+                            });
+                          }
                         },
                       ),
                     ),
@@ -196,9 +198,11 @@ class _EditPalletState extends State<EditPallet> {
                                         () => const ChooseSKUScreen(
                                               type: "Variant",
                                             ));
-                                setState(() {
-                                  selectedVariant = locationVal;
-                                });
+                                if (locationVal != null) {
+                                  setState(() {
+                                    selectedVariant = locationVal;
+                                  });
+                                }
                               },
                             ),
                           ),

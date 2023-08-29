@@ -26,6 +26,7 @@ class PalletDetail {
   String? batch;
   String? mappedWeight;
   int? mappedWeightVal;
+  dynamic tempIndex;
 
   PalletDetail(
       {this.id,

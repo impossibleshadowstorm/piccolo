@@ -186,21 +186,28 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                 selectedPallet = locationVal;
                                 if (value != null) {
                                   var index = controller.masterPallets
-                                      .firstWhere((element) =>
+                                      .indexWhere((element) =>
                                           element.name ==
                                           palletDetails?.data?.palletName);
-                                  selectedPallet = index;
+                                  if (index != -1) {
+                                    selectedPallet =
+                                        controller.masterPallets[index];
+                                  }
 
                                   var indexLoc = controller.locationsList
-                                      .firstWhere((element) =>
+                                      .indexWhere((element) =>
                                           element.name ==
                                           palletDetails
                                               ?.data?.palletLastLocation);
-                                  selectedLocation = indexLoc;
+                                  if (indexLoc != -1) {
+                                    selectedLocation =
+                                        controller.locationsList[indexLoc];
+                                  }
 
                                   //
                                   //
                                   controller.listOfPalletItems.clear();
+                                  controller.listOfPalletItemsAPI.clear();
                                   palletDetails?.data?.palletDetails
                                       ?.forEach((element) {
                                     String formattedDateActual =
@@ -280,6 +287,11 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                       //   String formattedDateActual =
                       //       DateFormat('yyyy-MM-dd').format(DateTime.now());
                       // }
+
+                      for (var e in controller.listOfPalletItemsAPI) {
+                        log("\n$e");
+                      }
+
                       Map<String, dynamic> body = {
                         "location_id": selectedLocation?.id,
                         "master_pallet_id": selectedPallet?.id,
@@ -287,7 +299,7 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                         "is_request_for_warehouse": true,
                         "pallet_details": controller.listOfPalletItemsAPI
                       };
-                      log("$body");
+
                       await _webservices
                           .updatePallet(
                               body, palletDetails?.data?.id?.toInt() ?? -1)
@@ -538,12 +550,9 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
                                 btnOkOnPress: () {
                                   if (num.parse(controller
                                           .listOfPalletItems[widget.index]
-                                          .mappedWeightVal
+                                          .weight
                                           .toString()) ==
-                                      num.parse(controller
-                                              .listOfPalletItems[widget.index]
-                                              .weight ??
-                                          "0.0")) {
+                                      num.parse(weight.text)) {
                                     controller.listOfPalletItems
                                         .removeAt(widget.index);
                                     controller.listOfPalletItemsAPI
@@ -579,8 +588,15 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
                                                     "0.0") -
                                                 num.parse(weight.text))
                                             .toString());
+                                    for (var e
+                                        in controller.listOfPalletItemsAPI) {
+                                      log("$e");
+                                    }
+                                    log("${controller.listOfPalletItemsAPI.length}");
                                     controller.listOfPalletItemsAPI
                                         .removeAt(widget.index);
+                                    log("${controller.listOfPalletItemsAPI.length}");
+
                                     String formattedDateActual =
                                         DateFormat('yyyy-MM-dd')
                                             .format(DateTime.now());
@@ -593,6 +609,8 @@ class _SKUReturnTileState extends State<SKUReturnTile> {
                                       "batch": tempPallet.batch,
                                       "batch_date": formattedDateActual
                                     });
+                                    log("${controller.listOfPalletItemsAPI.length}");
+
                                     controller.listOfPalletItems
                                         .removeAt(widget.index);
                                   }
