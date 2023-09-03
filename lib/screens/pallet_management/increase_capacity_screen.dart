@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -15,7 +14,6 @@ import 'package:piccolo/screens/pallet_management/choose_sku_screen.dart';
 import 'package:piccolo/screens/pallet_management/edit_pallet.dart';
 import 'package:piccolo/services/webservices.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:wc_form_validators/wc_form_validators.dart';
 import '../../common/widgets/DefaultBtn.dart';
 import '../../common/widgets/DefaultContainerButton.dart';
 import '../../common/widgets/ScanContainer.dart';
@@ -36,6 +34,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
   MasterPallet? selectedSKU;
   MasterPallet? selectedVariant;
   DateTime selectedDate = DateTime.now();
+  bool palletMatch = false;
   String date = "";
   int lenght = 5;
   PalletDetailsPm? palletDetails;
@@ -66,6 +65,57 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
   void dispose() {
     weight.dispose();
     super.dispose();
+  }
+
+  void fillPallet(MasterPallet locationVal) {
+    CustomProgressDialog progressDialog =
+        // ignore: use_build_context_synchronously
+        CustomProgressDialog(
+      context,
+      blur: 10,
+      dismissable: false,
+      onDismiss: () => log("Do something onDismiss"),
+    );
+    progressDialog.show();
+    _webservices.getPalletDetails(locationVal.name!).then((value) {
+      progressDialog.dismiss();
+      palletDetails = value;
+      selectedPallet = locationVal;
+      if (value != null) {
+        String formattedDateActual =
+            DateFormat('yyyy-MM-dd').format(selectedDate);
+        var index = controller.masterPallets.indexWhere(
+            (element) => element.name == palletDetails?.data?.palletName);
+        if (index != -1) {
+          selectedPallet = controller.masterPallets[index];
+        }
+
+        var indexLoc = controller.locationsList.indexWhere((element) =>
+            element.name == palletDetails?.data?.palletLastLocation);
+        if (indexLoc != -1) {
+          selectedLocation = controller.locationsList[indexLoc];
+        }
+
+        //
+        //
+        palletDetails?.data?.palletDetails?.forEach((element) {
+          listPallets.add(element);
+          pList.add({
+            "id": element.id,
+            "sku_code_id": element.skuCodeId,
+            "variant_id": element.variantId,
+            "weight": num.tryParse(element.weight ?? "0.0"),
+            "batch": element.batch,
+            "batch_date": formattedDateActual,
+          });
+          totalWeight = totalWeight + num.parse(element.weight ?? "0.0");
+        });
+
+        //
+        //
+      }
+      setState(() {});
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -228,71 +278,9 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                                 ));
 
                                     if (locationVal != null) {
-                                      CustomProgressDialog progressDialog =
-                                          // ignore: use_build_context_synchronously
-                                          CustomProgressDialog(
-                                        context,
-                                        blur: 10,
-                                        dismissable: false,
-                                        onDismiss: () =>
-                                            log("Do something onDismiss"),
-                                      );
-                                      progressDialog.show();
-                                      _webservices
-                                          .getPalletDetails(locationVal.name!)
-                                          .then((value) {
-                                        progressDialog.dismiss();
-                                        palletDetails = value;
-                                        selectedPallet = locationVal;
-                                        if (value != null) {
-                                          String formattedDateActual =
-                                              DateFormat('yyyy-MM-dd')
-                                                  .format(selectedDate);
-                                          var index = controller.masterPallets
-                                              .indexWhere((element) =>
-                                                  element.name ==
-                                                  palletDetails
-                                                      ?.data?.palletName);
-                                          if (index != -1) {
-                                            selectedPallet =
-                                                controller.masterPallets[index];
-                                          }
-
-                                          var indexLoc = controller
-                                              .locationsList
-                                              .indexWhere((element) =>
-                                                  element.name ==
-                                                  palletDetails?.data
-                                                      ?.palletLastLocation);
-                                          if (indexLoc != -1) {
-                                            selectedLocation = controller
-                                                .locationsList[indexLoc];
-                                          }
-
-                                          //
-                                          //
-                                          palletDetails?.data?.palletDetails
-                                              ?.forEach((element) {
-                                            listPallets.add(element);
-                                            pList.add({
-                                              "id": element.id,
-                                              "sku_code_id": element.skuCodeId,
-                                              "variant_id": element.variantId,
-                                              "weight": num.tryParse(
-                                                  element.weight ?? "0.0"),
-                                              "batch": element.batch,
-                                              "batch_date": formattedDateActual,
-                                            });
-                                            totalWeight = totalWeight +
-                                                num.parse(
-                                                    element.weight ?? "0.0");
-                                          });
-
-                                          //
-                                          //
-                                        }
-                                        setState(() {});
-                                      });
+                                      selectedPallet = locationVal;
+                                      palletMatch = false;
+                                      //fillPallet(locationVal);
                                     }
                                     setState(() {});
                                   },
@@ -309,10 +297,33 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                       true,
                                       ScanMode.BARCODE);
                               log(barcodeScanRes, name: "BarCode Value");
-                              if (selectedPallet != null) {
+                              if (selectedPallet == null) {
+                                var index = controller.masterPallets.indexWhere(
+                                    (element) =>
+                                        element.name == barcodeScanRes);
+                                if (index != -1) {
+                                  setState(() {
+                                    selectedPallet =
+                                        controller.masterPallets[index];
+                                    palletMatch = true;
+                                  });
+                                  fillPallet(selectedPallet!);
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Selected Pallet is invalid");
+                                }
+                              } else if (selectedPallet != null) {
                                 if (selectedPallet?.name != barcodeScanRes) {
                                   Fluttertoast.showToast(
                                       msg: "Pallet number is not matching");
+                                  selectedPallet = null;
+                                  palletMatch = false;
+                                  setState(() {});
+                                } else {
+                                  fillPallet(selectedPallet!);
+                                  setState(() {
+                                    palletMatch = true;
+                                  });
                                 }
                               }
                             },
@@ -343,18 +354,29 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             },
                           ),
                         ),
-                        SizedBox(width: 5.w),
-                        Expanded(
-                          child: DefaultContainerButton(
-                            noIcon: false,
-                            icon: Icons.calendar_month,
-                            label: date,
-                            ontap: () {
-                              _selectDate(context);
-                            },
-                          ),
-                        ),
+                        // SizedBox(width: 5.w),
+                        // Expanded(
+                        //   child: DefaultContainerButton(
+                        //     noIcon: false,
+                        //     icon: Icons.calendar_month,
+                        //     label: date,
+                        //     ontap: () {
+                        //       _selectDate(context);
+                        //     },
+                        //   ),
+                        // ),
                       ],
+                    ),
+                    SizedBox(
+                      height: 2.h,
+                    ),
+                    DefaultContainerButton(
+                      noIcon: false,
+                      icon: Icons.calendar_month,
+                      label: date,
+                      ontap: () {
+                        _selectDate(context);
+                      },
                     ),
                     SizedBox(height: 2.h),
                     Row(
@@ -438,6 +460,9 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           } else if (selectedPallet == null) {
                             Fluttertoast.showToast(
                                 msg: "Please select Pallet first");
+                          } else if (!palletMatch) {
+                            Fluttertoast.showToast(
+                                msg: "Please scan Pallet first");
                           } else if (selectedSKU == null) {
                             Fluttertoast.showToast(msg: "Please select SKU");
                           } else if (selectedVariant == null) {

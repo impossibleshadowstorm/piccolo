@@ -41,6 +41,7 @@ class _RTGlassState extends State<RTGlass> {
   bool palletScanned = true;
   bool dropdownDisable = false;
   bool disableDrop = false;
+  bool dropMatched = false;
   String? selectedDrop;
   List<String> palletItems = ["Pallet No. 1", "Pallet No. 2", "Pallet No. 3"];
   List<String> dropItems = ["Drop No. 1", "Drop No. 2", "Drop No. 3"];
@@ -49,12 +50,12 @@ class _RTGlassState extends State<RTGlass> {
     await _webservices.getRTCreateDetails(widget.label).then((value) {
       loading = false;
       if (value != null) {
-        controller.locationsList.clear();
+        controller.rtLocationsList.clear();
         controller.dropLocationsList.clear();
         model = value;
         value.data?.fromLocations?.forEach((element) {
           var val = element;
-          controller.locationsList.add(val);
+          controller.rtLocationsList.add(val);
         });
         value.data?.toLocations?.forEach((element) {
           controller.dropLocationsList.add(element);
@@ -99,6 +100,14 @@ class _RTGlassState extends State<RTGlass> {
   @override
   void initState() {
     fetchData();
+    if (!(widget.label == "GLASS" ||
+        widget.label == "CERAMIC" ||
+        widget.label == "RECYCLE" ||
+        widget.label == "ASSEMBLY LINE TO WH")) {
+      setState(() {
+        dropMatched = true;
+      });
+    }
     super.initState();
   }
 
@@ -251,15 +260,8 @@ class _RTGlassState extends State<RTGlass> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 dropdownValue = newValue!;
+                                palletMatch = false;
                               });
-                              if (widget.label == "GLASS" ||
-                                  widget.label == "CERAMIC" ||
-                                  widget.label == "RECYCLE" ||
-                                  widget.label == "ASSEMBLY LINE TO WH") {
-                                checkContainer();
-                              } else {
-                                setDrop();
-                              }
                             },
                             items: options
                                 .map<DropdownMenuItem<String>>((String value) {
@@ -291,6 +293,9 @@ class _RTGlassState extends State<RTGlass> {
                             if (selectedFromLocation == null) {
                               Fluttertoast.showToast(
                                   msg: "Please select location first");
+                            } else if (palletMatch) {
+                              Fluttertoast.showToast(
+                                  msg: "Pallet is already scanned");
                             } else {
                               String barcodeScanRes =
                                   await FlutterBarcodeScanner.scanBarcode(
@@ -300,11 +305,39 @@ class _RTGlassState extends State<RTGlass> {
                                       ScanMode.BARCODE);
                               log(barcodeScanRes, name: "BarCode Value");
                               if (dropdownValue == null) {
-                                dropdownValue = barcodeScanRes;
-                                palletMatch = true;
-                                palletScanned = true;
+                                int index = options.indexWhere(
+                                    (element) => element == barcodeScanRes);
+                                if (index != -1) {
+                                  dropdownValue = barcodeScanRes;
+                                  palletMatch = true;
+                                  palletScanned = true;
+                                  setState(() {});
+                                  if (widget.label == "GLASS" ||
+                                      widget.label == "CERAMIC" ||
+                                      widget.label == "RECYCLE" ||
+                                      widget.label == "ASSEMBLY LINE TO WH") {
+                                    checkContainer();
+                                  } else {
+                                    setDrop();
+                                  }
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Invalid Pallet Selected");
+                                  setState(() {
+                                    dropdownValue = null;
+                                    palletMatch = false;
+                                  });
+                                }
                               } else {
                                 if (dropdownValue == barcodeScanRes) {
+                                  if (widget.label == "GLASS" ||
+                                      widget.label == "CERAMIC" ||
+                                      widget.label == "RECYCLE" ||
+                                      widget.label == "ASSEMBLY LINE TO WH") {
+                                    checkContainer();
+                                  } else {
+                                    setDrop();
+                                  }
                                   palletMatch = true;
                                   palletScanned = true;
                                 } else {
@@ -313,6 +346,7 @@ class _RTGlassState extends State<RTGlass> {
                                   dropdownValue = null;
                                   palletMatch = false;
                                   palletScanned = true;
+                                  setState(() {});
                                 }
                               }
                               setState(() {});
@@ -343,6 +377,9 @@ class _RTGlassState extends State<RTGlass> {
                                   } else if (dropdownValue == null) {
                                     Fluttertoast.showToast(
                                         msg: "Please select pallet");
+                                  } else if (!palletMatch) {
+                                    Fluttertoast.showToast(
+                                        msg: "Please scan pallet");
                                   } else {
                                     if (dropdownDisable) {
                                     } else {
@@ -370,13 +407,52 @@ class _RTGlassState extends State<RTGlass> {
                           flex: 2,
                           child: ScanContainer(
                             onTap: () async {
-                              String barcodeScanRes =
-                                  await FlutterBarcodeScanner.scanBarcode(
-                                      "#808080",
-                                      "Cancel",
-                                      true,
-                                      ScanMode.BARCODE);
-                              log(barcodeScanRes, name: "BarCode Value");
+                              if (dropMatched) {
+                                Fluttertoast.showToast(
+                                    msg: "Drop Already Scanned");
+                              } else {
+                                String barcodeScanRes =
+                                    await FlutterBarcodeScanner.scanBarcode(
+                                        "#808080",
+                                        "Cancel",
+                                        true,
+                                        ScanMode.BARCODE);
+                                log(barcodeScanRes, name: "BarCode Value");
+                                if (selectedToLocation == null) {
+                                  int index = controller.dropLocationsList
+                                      .indexWhere((element) =>
+                                          element.name == barcodeScanRes);
+
+                                  if (index != -1) {
+                                    setState(() {
+                                      selectedToLocation =
+                                          controller.dropLocationsList[index];
+                                      dropMatched = true;
+                                    });
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg: "Drop location is invalid");
+                                    setState(() {
+                                      dropMatched = false;
+                                      selectedToLocation = null;
+                                    });
+                                  }
+                                } else {
+                                  if (selectedToLocation?.name ==
+                                      barcodeScanRes) {
+                                    setState(() {
+                                      dropMatched = true;
+                                    });
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg: "Drop Location is invalid");
+                                    setState(() {
+                                      dropMatched = false;
+                                      selectedToLocation = null;
+                                    });
+                                  }
+                                }
+                              }
                             },
                           ),
                         ),
@@ -421,8 +497,18 @@ class _RTGlassState extends State<RTGlass> {
                     width: double.infinity,
                     child: ElevatedButton(
                         onPressed: () async {
-                          if (!palletScanned) {
-                            Fluttertoast.showToast(msg: "Please Scan Pallet");
+                          if (selectedFromLocation == null) {
+                            Fluttertoast.showToast(
+                                msg: "Please select pickup location");
+                          } else if (!palletMatch) {
+                            Fluttertoast.showToast(
+                                msg: "Please Select / Scan Pallet");
+                          } else if (selectedToLocation == null) {
+                            Fluttertoast.showToast(
+                                msg: "Please select drop location");
+                          } else if (!dropMatched) {
+                            Fluttertoast.showToast(
+                                msg: "Please scan drop location");
                           } else {
                             Map<String, dynamic> body = {
                               "transfered_by": GlobalVariables.user?.id,
@@ -473,25 +559,6 @@ class _RTGlassState extends State<RTGlass> {
                               fontWeight: FontWeight.w400),
                         )),
                   ),
-                  Visibility(
-                    visible: (palletMatch),
-                    child: Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.symmetric(vertical: 3.0.h),
-                      padding: EdgeInsets.symmetric(
-                          vertical: 3.0.h, horizontal: 5.0.w),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(1.0.w),
-                          border: Border.all(color: Colors.red)),
-                      child: Text(
-                        "ALERT: WRONG PALLET SELECTED",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                    ),
-                  )
                 ],
               ),
             ),

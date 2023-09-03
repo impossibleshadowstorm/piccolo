@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
 import 'package:piccolo/screens/finished_goods/finished_goods_create_pallet_screen.dart';
@@ -22,7 +25,17 @@ class _FinishedGoodsManageScreenState extends State<FinishedGoodsManageScreen> {
   final controller = PalletGetController.palletController;
 
   Future<void> fetchMasterDate() async {
+    CustomProgressDialog progressDialog =
+        // ignore: use_build_context_synchronously
+        CustomProgressDialog(
+      context,
+      blur: 10,
+      dismissable: false,
+      onDismiss: () => log("Do something onDismiss"),
+    );
+    progressDialog.show();
     await _webservices.fetchMaster(false).then((value) {
+      progressDialog.dismiss();
       if (value != null) {
         controller.locationsList.value = value.data?.locations ?? [];
         controller.masterPallets.value = value.data?.masterPallets ?? [];
@@ -66,7 +79,9 @@ class _FinishedGoodsManageScreenState extends State<FinishedGoodsManageScreen> {
                   SizedBox(height: 3.h),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const FinishedGoodsCreatePalletScreen());
+                      fetchMasterDate().whenComplete(() {
+                        Get.to(() => const FinishedGoodsCreatePalletScreen());
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                         fixedSize: Size(90.0.w, 6.0.h),
@@ -84,7 +99,9 @@ class _FinishedGoodsManageScreenState extends State<FinishedGoodsManageScreen> {
                   SizedBox(height: 3.h),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const FinishedGoodsOrderScreen());
+                      fetchMasterDate().whenComplete(() {
+                        Get.to(() => const FinishedGoodsOrderScreen());
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                         fixedSize: Size(90.0.w, 6.0.h),

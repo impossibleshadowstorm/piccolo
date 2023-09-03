@@ -36,8 +36,8 @@ class _FinishedGoodsCreatePalletScreenState
   Location? selectedLocation;
   MasterPallet? selectedPallet;
   Orders? selectedOrder;
-  bool palletScanned = false;
-  bool palletMatched = false;
+  bool palletMatch = false;
+  bool boxMatch = false;
   TextEditingController boxNo = TextEditingController();
   final controller = PalletGetController.palletController;
   final _formKey = GlobalKey<FormState>();
@@ -97,6 +97,52 @@ class _FinishedGoodsCreatePalletScreenState
           }
         });
       }
+    }
+  }
+
+  void fillPallet(MasterPallet? locationVal) {
+    if (locationVal != null) {
+      CustomProgressDialog progressDialog =
+          // ignore: use_build_context_synchronously
+          CustomProgressDialog(
+        context,
+        blur: 10,
+        dismissable: false,
+        onDismiss: () => log("Do something onDismiss"),
+      );
+      progressDialog.show();
+      listOfBoxes.clear();
+      _webservices.getBoxList(locationVal.name!).then((value) {
+        progressDialog.dismiss();
+        palletDetails = value;
+        selectedPallet = locationVal;
+        if (value != null) {
+          var orderIndex = controller.orderList
+              .indexWhere((element) => element.id == value.data?.orderId);
+          if (orderIndex != -1) {
+            selectedOrder = controller.orderList[orderIndex];
+          }
+          var indexLoc = controller.locationsList.firstWhere((element) =>
+              element.name == palletDetails?.data?.palletLastLocation);
+          selectedLocation = indexLoc;
+
+          //
+          //
+          palletDetails?.data?.palletBoxDetails?.forEach((element) {
+            listOfBoxes.add({
+              "id": element.id,
+              "boxNo": element.boxName?.split("-").last,
+              "order": element.boxName
+            });
+          });
+
+          //
+          //
+        } else {
+          listOfBoxes.clear();
+        }
+        setState(() {});
+      });
     }
   }
 
@@ -208,62 +254,9 @@ class _FinishedGoodsCreatePalletScreenState
                                                         type: "Pallet",
                                                       ));
                                           if (locationVal != null) {
-                                            CustomProgressDialog
-                                                progressDialog =
-                                                // ignore: use_build_context_synchronously
-                                                CustomProgressDialog(
-                                              context,
-                                              blur: 10,
-                                              dismissable: false,
-                                              onDismiss: () =>
-                                                  log("Do something onDismiss"),
-                                            );
-                                            progressDialog.show();
-                                            listOfBoxes.clear();
-                                            _webservices
-                                                .getBoxList(locationVal.name!)
-                                                .then((value) {
-                                              progressDialog.dismiss();
-                                              palletDetails = value;
+                                            setState(() {
                                               selectedPallet = locationVal;
-                                              if (value != null) {
-                                                var orderIndex = controller
-                                                    .orderList
-                                                    .indexWhere((element) =>
-                                                        element.id ==
-                                                        value.data?.orderId);
-                                                if (orderIndex != -1) {
-                                                  selectedOrder = controller
-                                                      .orderList[orderIndex];
-                                                }
-                                                var indexLoc = controller
-                                                    .locationsList
-                                                    .firstWhere((element) =>
-                                                        element.name ==
-                                                        palletDetails?.data
-                                                            ?.palletLastLocation);
-                                                selectedLocation = indexLoc;
-
-                                                //
-                                                //
-                                                palletDetails
-                                                    ?.data?.palletBoxDetails
-                                                    ?.forEach((element) {
-                                                  listOfBoxes.add({
-                                                    "id": element.id,
-                                                    "boxNo": element.boxName
-                                                        ?.split("-")
-                                                        .last,
-                                                    "order": element.boxName
-                                                  });
-                                                });
-
-                                                //
-                                                //
-                                              } else {
-                                                listOfBoxes.clear();
-                                              }
-                                              setState(() {});
+                                              palletMatch = false;
                                             });
                                           }
                                         }
@@ -280,37 +273,34 @@ class _FinishedGoodsCreatePalletScreenState
                                           "Cancel",
                                           true,
                                           ScanMode.BARCODE);
-                                  if (barcodeScanRes == "-1") {
-                                    Fluttertoast.showToast(
-                                        msg: "Something went wrong!!");
-                                  } else {
-                                    if (selectedPallet == null) {
-                                      for (var element
-                                          in controller.masterPallets) {
-                                        if (element.name.toLowerCase() ==
-                                            barcodeScanRes.toLowerCase()) {
-                                          selectedPallet = element;
-                                          palletMatched = true;
-                                          palletScanned = true;
-                                        } else {
-                                          Fluttertoast.showToast(
-                                              msg:
-                                                  "$barcodeScanRes is invalid pallet number");
-                                        }
-                                      }
+                                  if (selectedPallet == null) {
+                                    var index = controller.masterPallets
+                                        .indexWhere((element) =>
+                                            element.name == barcodeScanRes);
+                                    if (index != -1) {
+                                      setState(() {
+                                        selectedPallet =
+                                            controller.masterPallets[index];
+                                        palletMatch = true;
+                                      });
+                                      fillPallet(selectedPallet!);
                                     } else {
-                                      if (selectedPallet?.name ==
-                                          barcodeScanRes) {
-                                        Fluttertoast.showToast(
-                                            msg: "Pallet Matched!!");
-                                        palletMatched = true;
-                                        palletScanned = true;
-                                      } else {
-                                        Fluttertoast.showToast(
-                                            msg:
-                                                "Please details does not match!!!");
-                                        selectedPallet = null;
-                                      }
+                                      Fluttertoast.showToast(
+                                          msg: "Selected Pallet is invalid");
+                                    }
+                                  } else if (selectedPallet != null) {
+                                    if (selectedPallet?.name !=
+                                        barcodeScanRes) {
+                                      Fluttertoast.showToast(
+                                          msg: "Pallet number is not matching");
+                                      selectedPallet = null;
+                                      palletMatch = false;
+                                      setState(() {});
+                                    } else {
+                                      fillPallet(selectedPallet!);
+                                      setState(() {
+                                        palletMatch = true;
+                                      });
                                     }
                                   }
                                   setState(() {});
@@ -413,6 +403,24 @@ class _FinishedGoodsCreatePalletScreenState
                                     true,
                                     ScanMode.BARCODE);
                             log(barcodeScanRes, name: "BarCode Value");
+                            if (barcodeScanRes != "-1") {
+                              if (boxNo.text.isEmpty) {
+                                setState(() {
+                                  boxNo.text = barcodeScanRes;
+                                  boxMatch = true;
+                                });
+                              } else {
+                                if (boxNo.text != barcodeScanRes) {
+                                  Fluttertoast.showToast(
+                                      msg: "Box Number Does not match");
+                                  boxNo.clear();
+                                } else if (boxNo.text == barcodeScanRes) {
+                                  setState(() {
+                                    boxMatch = true;
+                                  });
+                                }
+                              }
+                            }
                           },
                           child: Container(
                             height: 6.0.h,
@@ -452,26 +460,44 @@ class _FinishedGoodsCreatePalletScreenState
                                 if (selectedLocation == null) {
                                   Fluttertoast.showToast(
                                       msg: "Please selec location first!!");
-                                } else if (palletMatched) {
+                                } else if (!palletMatch) {
                                   Fluttertoast.showToast(
                                       msg:
                                           "Please select or scan pallet first!!");
                                 } else if (selectedOrder == null) {
                                   Fluttertoast.showToast(
                                       msg: "Please select order first!");
+                                } else if (!boxMatch) {
+                                  Fluttertoast.showToast(
+                                      msg: "Please enter / scan box number");
                                 } else {
                                   if (_formKey.currentState?.validate() ??
                                       false) {
-                                    listOfBoxes.add({
-                                      "id": null,
-                                      "boxNo": boxNo.text,
-                                      "order":
-                                          "${selectedOrder?.name ?? ""}-${boxNo.text}"
-                                    });
+                                    int index = listOfBoxes.indexWhere(
+                                        (element) =>
+                                            element["boxNo"] == boxNo.text);
+                                    if (index != -1) {
+                                      Fluttertoast.showToast(
+                                          msg: "${boxNo.text} already exist!");
+                                      boxNo.clear();
 
-                                    setState(() {});
-                                    boxNo.clear();
-                                    Get.focusScope?.unfocus();
+                                      setState(() {
+                                        boxMatch = false;
+                                      });
+                                    } else {
+                                      listOfBoxes.add({
+                                        "id": null,
+                                        "boxNo": boxNo.text,
+                                        "order":
+                                            "${selectedOrder?.name ?? ""}-${boxNo.text}"
+                                      });
+
+                                      setState(() {
+                                        boxMatch = false;
+                                      });
+                                      boxNo.clear();
+                                      Get.focusScope?.unfocus();
+                                    }
                                   }
                                 }
                               },

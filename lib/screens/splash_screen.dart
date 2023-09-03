@@ -57,17 +57,13 @@ class _SplashScreenState extends State<SplashScreen> {
           //fetchMasterDate().whenComplete(() {
           Get.offAll(() => const ManageScreen());
           //  });
+        } else if (data?.role == "REACH_TRUCK") {
+          //   // fetchMasterDate().whenComplete(() {
+          Get.offAll(() => RTJobsPendingScreen());
+          //   //  });
+        } else if (data?.role == "FG_PALLET_CREATION") {
+          Get.offAll(() => const FinishedGoodsManageScreen());
         }
-        // else
-        // if (data?.role == "REACH_TRUCK") {
-        //   //   // fetchMasterDate().whenComplete(() {
-        //   Get.offAll(() => RTJobsPendingScreen());
-        //   //   //  });
-        // }
-        // else
-        // if (data?.role == "FG_PALLET_CREATION") {
-        //   Get.offAll(() => const FinishedGoodsManageScreen());
-        // }
         return;
       }
       Get.offAll(() => const LoginScreen());

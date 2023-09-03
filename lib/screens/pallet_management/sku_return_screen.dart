@@ -34,6 +34,72 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
   List<PalletDetail> listPallets = [];
   List<Map<String, dynamic>> pList = [];
   List<Map<String, dynamic>> apiTempList = [];
+  bool palletMatch = false;
+
+  void fillPallet(MasterPallet? locationVal) {
+    if (locationVal != null) {
+      CustomProgressDialog progressDialog =
+          // ignore: use_build_context_synchronously
+          CustomProgressDialog(
+        context,
+        blur: 10,
+        dismissable: false,
+        onDismiss: () => log("Do something onDismiss"),
+      );
+      progressDialog.show();
+      _webservices.getPalletDetails(locationVal.name!).then((value) {
+        progressDialog.dismiss();
+        palletDetails = value;
+        selectedPallet = locationVal;
+        if (value != null) {
+          var index = controller.masterPallets.indexWhere(
+              (element) => element.name == palletDetails?.data?.palletName);
+          if (index != -1) {
+            selectedPallet = controller.masterPallets[index];
+          }
+
+          var indexLoc = controller.locationsList.indexWhere((element) =>
+              element.name == palletDetails?.data?.palletLastLocation);
+          if (indexLoc != -1) {
+            selectedLocation = controller.locationsList[indexLoc];
+          }
+
+          //
+          //
+          controller.listOfPalletItems.clear();
+          controller.listOfPalletItemsAPI.clear();
+          palletDetails?.data?.palletDetails?.forEach((element) {
+            String formattedDateActual =
+                DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+            controller.listOfPalletItemsAPI.add({
+              "id": element.id,
+              "sku_code_id": element.skuCodeId,
+              "variant_id": element.variantId,
+              "weight": num.tryParse(element.weight ?? "0.0"),
+              "batch": element.batch,
+              "batch_date": formattedDateActual
+            });
+            controller.listOfPalletItems.add(element);
+            listPallets.add(element);
+            pList.add({
+              "id": element.id,
+              "sku_code_id": element.skuCodeId,
+              "variant_id": element.variantId,
+              "weight": num.tryParse(element.weight ?? "0.0"),
+              "batch": element.batch,
+            });
+            totalWeight = totalWeight + num.parse(element.weight ?? "0.0");
+          });
+
+          //
+          //
+          setState(() {});
+        }
+        setState(() {});
+      });
+    }
+  }
 
   final Webservices _webservices = Webservices();
   num totalWeight = 0;
@@ -167,82 +233,9 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                 () => const ChooseSKUScreen(
                                       type: "Pallet",
                                     ));
-                            selectedPallet = locationVal;
                             if (locationVal != null) {
-                              CustomProgressDialog progressDialog =
-                                  // ignore: use_build_context_synchronously
-                                  CustomProgressDialog(
-                                context,
-                                blur: 10,
-                                dismissable: false,
-                                onDismiss: () => log("Do something onDismiss"),
-                              );
-                              progressDialog.show();
-                              _webservices
-                                  .getPalletDetails(locationVal.name!)
-                                  .then((value) {
-                                progressDialog.dismiss();
-                                palletDetails = value;
-                                selectedPallet = locationVal;
-                                if (value != null) {
-                                  var index = controller.masterPallets
-                                      .indexWhere((element) =>
-                                          element.name ==
-                                          palletDetails?.data?.palletName);
-                                  if (index != -1) {
-                                    selectedPallet =
-                                        controller.masterPallets[index];
-                                  }
-
-                                  var indexLoc = controller.locationsList
-                                      .indexWhere((element) =>
-                                          element.name ==
-                                          palletDetails
-                                              ?.data?.palletLastLocation);
-                                  if (indexLoc != -1) {
-                                    selectedLocation =
-                                        controller.locationsList[indexLoc];
-                                  }
-
-                                  //
-                                  //
-                                  controller.listOfPalletItems.clear();
-                                  controller.listOfPalletItemsAPI.clear();
-                                  palletDetails?.data?.palletDetails
-                                      ?.forEach((element) {
-                                    String formattedDateActual =
-                                        DateFormat('yyyy-MM-dd')
-                                            .format(DateTime.now());
-
-                                    controller.listOfPalletItemsAPI.add({
-                                      "id": element.id,
-                                      "sku_code_id": element.skuCodeId,
-                                      "variant_id": element.variantId,
-                                      "weight":
-                                          num.tryParse(element.weight ?? "0.0"),
-                                      "batch": element.batch,
-                                      "batch_date": formattedDateActual
-                                    });
-                                    controller.listOfPalletItems.add(element);
-                                    listPallets.add(element);
-                                    pList.add({
-                                      "id": element.id,
-                                      "sku_code_id": element.skuCodeId,
-                                      "variant_id": element.variantId,
-                                      "weight":
-                                          num.tryParse(element.weight ?? "0.0"),
-                                      "batch": element.batch,
-                                    });
-                                    totalWeight = totalWeight +
-                                        num.parse(element.weight ?? "0.0");
-                                  });
-
-                                  //
-                                  //
-                                  setState(() {});
-                                }
-                                setState(() {});
-                              });
+                              selectedPallet = locationVal;
+                              palletMatch = false;
                             }
                             setState(() {});
                           },
@@ -259,6 +252,34 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                                     true,
                                     ScanMode.BARCODE);
                             log(barcodeScanRes, name: "BarCode Value");
+                            if (selectedPallet == null) {
+                              var index = controller.masterPallets.indexWhere(
+                                  (element) => element.name == barcodeScanRes);
+                              if (index != -1) {
+                                setState(() {
+                                  selectedPallet =
+                                      controller.masterPallets[index];
+                                  palletMatch = true;
+                                });
+                                fillPallet(selectedPallet!);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg: "Selected Pallet is invalid");
+                              }
+                            } else if (selectedPallet != null) {
+                              if (selectedPallet?.name != barcodeScanRes) {
+                                Fluttertoast.showToast(
+                                    msg: "Pallet number is not matching");
+                                selectedPallet = null;
+                                palletMatch = false;
+                                setState(() {});
+                              } else {
+                                fillPallet(selectedPallet!);
+                                setState(() {
+                                  palletMatch = true;
+                                });
+                              }
+                            }
                           },
                         ),
                       ),
@@ -273,42 +294,45 @@ class _SKUReturnScreenState extends State<SKUReturnScreen> {
                     kolor: Colors.green,
                     label: "Request Warehouse",
                     onTap: () async {
-                      //log(body.toString(), name: "Body+");
-                      CustomProgressDialog progressDialog =
-                          // ignore: use_build_context_synchronously
-                          CustomProgressDialog(
-                        context,
-                        blur: 10,
-                        dismissable: false,
-                        onDismiss: () => log("Do something onDismiss"),
-                      );
-                      progressDialog.show();
-                      // for (var element in controller.listOfPalletItems) {
-                      //   String formattedDateActual =
-                      //       DateFormat('yyyy-MM-dd').format(DateTime.now());
-                      // }
+                      if (selectedLocation == null) {
+                        Fluttertoast.showToast(msg: "Please select location");
+                      } else if (selectedPallet == null) {
+                        Fluttertoast.showToast(msg: "Please select pallet");
+                      } else if (!palletMatch) {
+                        Fluttertoast.showToast(msg: "Please scan Pallet first");
+                      } else {
+                        CustomProgressDialog progressDialog =
+                            // ignore: use_build_context_synchronously
+                            CustomProgressDialog(
+                          context,
+                          blur: 10,
+                          dismissable: false,
+                          onDismiss: () => log("Do something onDismiss"),
+                        );
+                        progressDialog.show();
 
-                      for (var e in controller.listOfPalletItemsAPI) {
-                        log("\n$e");
-                      }
-
-                      Map<String, dynamic> body = {
-                        "location_id": selectedLocation?.id,
-                        "master_pallet_id": selectedPallet?.id,
-                        "updated_by": GlobalVariables.user?.id,
-                        "is_request_for_warehouse": true,
-                        "pallet_details": controller.listOfPalletItemsAPI
-                      };
-
-                      await _webservices
-                          .updatePallet(
-                              body, palletDetails?.data?.id?.toInt() ?? -1)
-                          .then((value) {
-                        progressDialog.dismiss();
-                        if (value) {
-                          Get.back();
+                        for (var e in controller.listOfPalletItemsAPI) {
+                          log("\n$e");
                         }
-                      });
+
+                        Map<String, dynamic> body = {
+                          "location_id": selectedLocation?.id,
+                          "master_pallet_id": selectedPallet?.id,
+                          "updated_by": GlobalVariables.user?.id,
+                          "is_request_for_warehouse": true,
+                          "pallet_details": controller.listOfPalletItemsAPI
+                        };
+
+                        await _webservices
+                            .updatePallet(
+                                body, palletDetails?.data?.id?.toInt() ?? -1)
+                            .then((value) {
+                          progressDialog.dismiss();
+                          if (value) {
+                            Get.back();
+                          }
+                        });
+                      }
                     },
                   ),
                   SizedBox(height: 4.h),

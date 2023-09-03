@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/constants.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
@@ -24,7 +27,17 @@ class _ManageScreenState extends State<ManageScreen> {
   final Webservices webservices = Webservices();
 
   Future<void> fetchMasterDate(bool create) async {
+    CustomProgressDialog progressDialog =
+        // ignore: use_build_context_synchronously
+        CustomProgressDialog(
+      context,
+      blur: 10,
+      dismissable: false,
+      onDismiss: () => log("Do something onDismiss"),
+    );
+    progressDialog.show();
     await webservices.fetchMaster(create).then((value) {
+      progressDialog.dismiss();
       if (value != null) {
         controller.locationsList.value = value.data?.locations ?? [];
         controller.masterPallets.value = value.data?.masterPallets ?? [];

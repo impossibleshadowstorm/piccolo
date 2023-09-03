@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:piccolo/GlobalVariables.dart';
 import 'package:piccolo/controller/PalletGetController.dart';
 import 'package:piccolo/screens/pallet_management/login_screen.dart';
 
@@ -33,6 +34,7 @@ extension StringExtension on String {
 Future<void> logout() async {
   final controller = PalletGetController.palletController;
   controller.dropLocationsList.clear();
+  controller.rtLocationsList.clear();
   controller.listOfPalletItems.clear();
   controller.locationsList.clear();
   controller.masterPallets.clear();
@@ -52,7 +54,9 @@ List getList(String label) {
   final controller = PalletGetController.palletController;
   switch (label) {
     case 'Location':
-      return controller.locationsList;
+      return GlobalVariables.user?.role == "REACH_TRUCK"
+          ? controller.rtLocationsList
+          : controller.locationsList;
     case 'Pallet':
       return controller.masterPallets;
     case 'SKU':

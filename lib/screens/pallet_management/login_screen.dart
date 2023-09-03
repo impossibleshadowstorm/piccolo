@@ -194,20 +194,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                         // fetchMasterDate().whenComplete(() {
                                         Get.offAll(() => const ManageScreen());
                                         //  });
+                                      } else if (value.data?.role ==
+                                          "REACH_TRUCK") {
+                                        controller.locationsList.clear();
+                                        //    fetchMasterDate().whenComplete(() {
+                                        Get.offAll(() => RTJobsPendingScreen());
+                                        //   });
+                                      } else if (value.data?.role ==
+                                          "FG_PALLET_CREATION") {
+                                        Get.offAll(() =>
+                                            const FinishedGoodsManageScreen());
                                       }
-                                      //  else
-                                      // if (value.data?.role == "REACH_TRUCK") {
-                                      //   controller.locationsList.clear();
-                                      //   //    fetchMasterDate().whenComplete(() {
-                                      //   Get.offAll(() => RTJobsPendingScreen());
-                                      //   //   });
-                                      // }
-                                      //else
-                                      // if (value.data?.role ==
-                                      //     "FG_PALLET_CREATION") {
-                                      //   Get.offAll(() =>
-                                      //       const FinishedGoodsManageScreen());
-                                      // }
                                     }
                                   });
                                 }
