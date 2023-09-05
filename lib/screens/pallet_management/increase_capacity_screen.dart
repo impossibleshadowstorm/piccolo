@@ -460,7 +460,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           } else if (selectedPallet == null) {
                             Fluttertoast.showToast(
                                 msg: "Please select Pallet first");
-                          } else if (palletMatch) {
+                          } else if (!palletMatch) {
                             Fluttertoast.showToast(
                                 msg: "Please scan Pallet first");
                           } else if (selectedSKU == null) {
