@@ -460,7 +460,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                           } else if (selectedPallet == null) {
                             Fluttertoast.showToast(
                                 msg: "Please select Pallet first");
-                          } else if (!palletMatch) {
+                          } else if (palletMatch) {
                             Fluttertoast.showToast(
                                 msg: "Please scan Pallet first");
                           } else if (selectedSKU == null) {
@@ -482,8 +482,6 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                               } else {
                                 int tempIndex = listPallets.indexWhere(
                                     (element) =>
-                                        element.variantId ==
-                                            selectedVariant?.id ||
                                         element.skuCodeId == selectedSKU?.id);
                                 if (tempIndex == -1) {
                                   String formattedDate = DateFormat('ddMMyyyy')
@@ -519,8 +517,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   setState(() {});
                                 } else {
                                   Fluttertoast.showToast(
-                                      msg:
-                                          "SKU / Variant Already Exist in Pallet");
+                                      msg: "SKU Already Exist in Pallet");
                                   setState(() {
                                     selectedSKU = null;
                                     selectedVariant = null;
