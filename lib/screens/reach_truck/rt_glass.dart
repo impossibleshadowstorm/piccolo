@@ -45,6 +45,27 @@ class _RTGlassState extends State<RTGlass> {
   String? selectedDrop;
   List<String> palletItems = ["Pallet No. 1", "Pallet No. 2", "Pallet No. 3"];
   List<String> dropItems = ["Drop No. 1", "Drop No. 2", "Drop No. 3"];
+  String? whLastLocation;
+
+  Future<void> getPalletDetails(String pallet) async {
+    CustomProgressDialog progressDialog =
+        // ignore: use_build_context_synchronously
+        CustomProgressDialog(
+      context,
+      blur: 10,
+      dismissable: false,
+      onDismiss: () => log("Do something onDismiss"),
+    );
+    progressDialog.show();
+    await _webservices.getPalletDetails(pallet).then((value) {
+      progressDialog.dismiss();
+      if (value != null) {
+        setState(() {
+          whLastLocation = value.data?.whLastLocation;
+        });
+      }
+    });
+  }
 
   fetchData() async {
     await _webservices.getRTCreateDetails(widget.label).then((value) {
@@ -309,8 +330,12 @@ class _RTGlassState extends State<RTGlass> {
                                     (element) => element == barcodeScanRes);
                                 if (index != -1) {
                                   dropdownValue = barcodeScanRes;
-                                  palletMatch = true;
-                                  palletScanned = true;
+                                  getPalletDetails(dropdownValue!)
+                                      .whenComplete(() {
+                                    palletMatch = true;
+                                    palletScanned = true;
+                                  });
+
                                   setState(() {});
                                   if (widget.label == "GLASS" ||
                                       widget.label == "CERAMIC" ||
@@ -338,8 +363,11 @@ class _RTGlassState extends State<RTGlass> {
                                   } else {
                                     setDrop();
                                   }
-                                  palletMatch = true;
-                                  palletScanned = true;
+                                  getPalletDetails(dropdownValue!)
+                                      .whenComplete(() {
+                                    palletMatch = true;
+                                    palletScanned = true;
+                                  });
                                 } else {
                                   Fluttertoast.showToast(
                                       msg: "Pallet does not match");
@@ -459,8 +487,13 @@ class _RTGlassState extends State<RTGlass> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: 1.0.h,
+                  ),
                   Visibility(
-                    visible: widget.label == "ASSEMBLY LINE TO WH",
+                    visible: widget.label == "ASSEMBLY LINE TO WH" &&
+                        whLastLocation != null &&
+                        palletMatch,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                           horizontal: 3.5.w, vertical: 0.5.h),
@@ -471,7 +504,7 @@ class _RTGlassState extends State<RTGlass> {
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Text(
-                            "LAST LOCATION: GENERAL",
+                            "LAST LOCATION: $whLastLocation",
                             overflow: TextOverflow.visible,
                             textAlign: TextAlign.center,
                             style: TextStyle(

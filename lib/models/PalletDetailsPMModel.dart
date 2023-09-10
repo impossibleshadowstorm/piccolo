@@ -66,18 +66,21 @@ class Data {
   num? id;
   String? palletName;
   String? palletLastLocation;
+  String? whLastLocation;
   List<PalletDetail>? palletDetails;
 
   Data({
     this.id,
     this.palletName,
     this.palletLastLocation,
+    this.whLastLocation,
     this.palletDetails,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
         id: num.tryParse(json['id'].toString()),
         palletName: json['pallet_name']?.toString(),
+        whLastLocation: json["wh_last_location"],
         palletLastLocation: json['pallet_last_location']?.toString(),
         palletDetails: (json['palletDetails'] as List<dynamic>?)
             ?.map((e) => PalletDetail.fromJson(Map<String, dynamic>.from(e)))
