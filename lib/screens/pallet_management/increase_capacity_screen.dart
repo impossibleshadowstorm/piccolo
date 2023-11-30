@@ -49,8 +49,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
       num remainingWeight = controller.maxWeightForPallet.value - totalWeight;
       return remainingWeight;
     } else {
-      num remainingWeight =
-          controller.maxWeightForContainer.value - totalWeight;
+      num remainingWeight = controller.maxWeightForContainer.value - totalWeight;
       return remainingWeight;
     }
   }
@@ -82,16 +81,15 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
       palletDetails = value;
       selectedPallet = locationVal;
       if (value != null) {
-        String formattedDateActual =
-            DateFormat('yyyy-MM-dd').format(selectedDate);
-        var index = controller.masterPallets.indexWhere(
-            (element) => element.name == palletDetails?.data?.palletName);
+        String formattedDateActual = DateFormat('yyyy-MM-dd').format(selectedDate);
+        var index = controller.masterPallets
+            .indexWhere((element) => element.name == palletDetails?.data?.palletName);
         if (index != -1) {
           selectedPallet = controller.masterPallets[index];
         }
 
-        var indexLoc = controller.locationsList.indexWhere((element) =>
-            element.name == palletDetails?.data?.palletLastLocation);
+        var indexLoc = controller.locationsList
+            .indexWhere((element) => element.name == palletDetails?.data?.palletLastLocation);
         if (indexLoc != -1) {
           selectedLocation = controller.locationsList[indexLoc];
         }
@@ -123,8 +121,8 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
         context: context,
         initialDate: selectedDate,
         initialDatePickerMode: DatePickerMode.day,
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2025));
+        firstDate: DateTime(2010),
+        lastDate: DateTime(2026));
     if (picked != null) {
       setState(() {
         selectedDate = picked;
@@ -151,10 +149,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
         backgroundColor: Constants.primaryOrangeColor,
         title: Text(
           "Pallet Management",
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.0.sp,
-              fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontSize: 18.0.sp, fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
@@ -182,8 +177,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                 progressDialog.show();
                 if (palletDetails?.data?.id != null) {
                   await _webservices
-                      .updatePallet(
-                          body, palletDetails?.data?.id?.toInt() ?? -1)
+                      .updatePallet(body, palletDetails?.data?.id?.toInt() ?? -1)
                       .then((value) {
                     progressDialog.dismiss();
                     if (value) {
@@ -207,9 +201,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                   Text(
                     "Save",
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17.0.sp,
-                        fontWeight: FontWeight.bold),
+                        color: Colors.white, fontSize: 17.0.sp, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(
                     width: 1.5.w,
@@ -243,12 +235,11 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                       label: selectedLocation?.name ?? "Search Location",
                       ontap: pList.isNotEmpty
                           ? () {
-                              Fluttertoast.showToast(
-                                  msg: "Cannot change location");
+                              Fluttertoast.showToast(msg: "Cannot change location");
                             }
                           : () async {
-                              Location? locationVal = await Get.to<dynamic>(
-                                  () => const ChooseSKUScreen(
+                              Location? locationVal =
+                                  await Get.to<dynamic>(() => const ChooseSKUScreen(
                                         type: "Location",
                                       ));
 
@@ -267,15 +258,13 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             label: selectedPallet?.name ?? "Search Pallet",
                             ontap: pList.isNotEmpty && selectedPallet != null
                                 ? () {
-                                    Fluttertoast.showToast(
-                                        msg: "Cannot change pallet");
+                                    Fluttertoast.showToast(msg: "Cannot change pallet");
                                   }
                                 : () async {
                                     MasterPallet? locationVal =
-                                        await Get.to<dynamic>(
-                                            () => const ChooseSKUScreen(
-                                                  type: "Pallet",
-                                                ));
+                                        await Get.to<dynamic>(() => const ChooseSKUScreen(
+                                              type: "Pallet",
+                                            ));
 
                                     if (locationVal != null) {
                                       selectedPallet = locationVal;
@@ -290,32 +279,24 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         Expanded(
                           child: ScanContainer(
                             onTap: () async {
-                              String barcodeScanRes =
-                                  await FlutterBarcodeScanner.scanBarcode(
-                                      "#808080",
-                                      "Cancel",
-                                      true,
-                                      ScanMode.BARCODE);
+                              String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+                                  "#808080", "Cancel", true, ScanMode.BARCODE);
                               log(barcodeScanRes, name: "BarCode Value");
                               if (selectedPallet == null) {
-                                var index = controller.masterPallets.indexWhere(
-                                    (element) =>
-                                        element.name == barcodeScanRes);
+                                var index = controller.masterPallets
+                                    .indexWhere((element) => element.name == barcodeScanRes);
                                 if (index != -1) {
                                   setState(() {
-                                    selectedPallet =
-                                        controller.masterPallets[index];
+                                    selectedPallet = controller.masterPallets[index];
                                     palletMatch = true;
                                   });
                                   fillPallet(selectedPallet!);
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Selected Pallet is invalid");
+                                  Fluttertoast.showToast(msg: "Selected Pallet is invalid");
                                 }
                               } else if (selectedPallet != null) {
                                 if (selectedPallet?.name != barcodeScanRes) {
-                                  Fluttertoast.showToast(
-                                      msg: "Pallet number is not matching");
+                                  Fluttertoast.showToast(msg: "Pallet number is not matching");
                                   selectedPallet = null;
                                   palletMatch = false;
                                   setState(() {});
@@ -344,8 +325,8 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             icon: Icons.search,
                             label: selectedSKU?.name ?? "SKU No.",
                             ontap: () async {
-                              MasterPallet? locationVal = await Get.to<dynamic>(
-                                  () => const ChooseSKUScreen(
+                              MasterPallet? locationVal =
+                                  await Get.to<dynamic>(() => const ChooseSKUScreen(
                                         type: "SKU",
                                       ));
                               setState(() {
@@ -387,8 +368,8 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             icon: Icons.search,
                             label: selectedVariant?.name ?? "Variant",
                             ontap: () async {
-                              MasterPallet? locationVal = await Get.to<dynamic>(
-                                  () => const ChooseSKUScreen(
+                              MasterPallet? locationVal =
+                                  await Get.to<dynamic>(() => const ChooseSKUScreen(
                                         type: "Variant",
                                       ));
                               setState(() {
@@ -415,19 +396,15 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                 }
                                 return null;
                               },
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
                               decoration: InputDecoration(
                                   fillColor: Colors.white,
                                   filled: true,
                                   hintText: "Weight",
-                                  hintStyle: TextStyle(
-                                      color: Colors.black, fontSize: 17.0.sp),
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 5.w),
+                                  hintStyle: TextStyle(color: Colors.black, fontSize: 17.0.sp),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 5.w),
                                   border: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(3.0.w))),
+                                      borderRadius: BorderRadius.circular(3.0.w))),
                             ),
                           ),
                         ),
@@ -455,55 +432,46 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         label: "Add",
                         onTap: () {
                           if (selectedLocation == null) {
-                            Fluttertoast.showToast(
-                                msg: "Please select location first");
+                            Fluttertoast.showToast(msg: "Please select location first");
                           } else if (selectedPallet == null) {
-                            Fluttertoast.showToast(
-                                msg: "Please select Pallet first");
+                            Fluttertoast.showToast(msg: "Please select Pallet first");
                           } else if (!palletMatch) {
-                            Fluttertoast.showToast(
-                                msg: "Please scan Pallet first");
-                          } else if (selectedSKU == null) {
-                            Fluttertoast.showToast(msg: "Please select SKU");
-                          } else if (selectedVariant == null) {
-                            Fluttertoast.showToast(
-                                msg: "Please select variant");
+                            Fluttertoast.showToast(msg: "Please scan Pallet first");
+                          }
+                          // else if (selectedSKU == null) {
+                          //   Fluttertoast.showToast(msg: "Please select SKU");
+                          // }
+                          else if (selectedVariant == null) {
+                            Fluttertoast.showToast(msg: "Please select variant");
                           } else {
                             if (_formKey.currentState?.validate() ?? false) {
                               FocusScope.of(context).unfocus();
                               num tempWeight = num.parse(weight.text);
                               if (getRemainingWeight() == 0) {
-                                Fluttertoast.showToast(
-                                    msg: "Pallet/Container is Full");
+                                Fluttertoast.showToast(msg: "Pallet/Container is Full");
                               } else if (tempWeight > getRemainingWeight()) {
                                 Fluttertoast.showToast(
-                                    msg:
-                                        "Please enter weight less than ${getRemainingWeight()}");
+                                    msg: "Please enter weight less than ${getRemainingWeight()}");
                               } else {
-                                int tempIndex = listPallets.indexWhere(
-                                    (element) =>
-                                        element.skuCodeId == selectedSKU?.id);
+                                int tempIndex = listPallets
+                                    .indexWhere((element) => element.skuCodeId == selectedSKU?.id);
                                 if (tempIndex == -1) {
-                                  String formattedDate = DateFormat('ddMMyyyy')
-                                      .format(selectedDate);
+                                  String formattedDate =
+                                      DateFormat('ddMMyyyy').format(selectedDate);
                                   String formattedDateActual =
-                                      DateFormat('yyyy-MM-dd')
-                                          .format(selectedDate);
+                                      DateFormat('yyyy-MM-dd').format(selectedDate);
                                   log(formattedDateActual, name: "Batch Name");
                                   pList.add({
                                     "id": null,
                                     "sku_code_id": selectedSKU?.id,
                                     "variant_id": selectedVariant?.id,
                                     "weight": num.tryParse(weight.text),
-                                    "batch":
-                                        "${selectedLocation?.abbr}$formattedDate",
+                                    "batch": "${selectedLocation?.abbr}$formattedDate",
                                     "batch_date": formattedDateActual
                                   });
-                                  totalWeight =
-                                      totalWeight + num.parse(weight.text);
+                                  totalWeight = totalWeight + num.parse(weight.text);
                                   listPallets.add(PalletDetail(
-                                      batch:
-                                          "${selectedLocation?.abbr}$formattedDate",
+                                      batch: "${selectedLocation?.abbr}$formattedDate",
                                       id: null,
                                       mappedWeight: "",
                                       skuCodeId: selectedSKU?.id,
@@ -516,8 +484,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                   weight.clear();
                                   setState(() {});
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "SKU Already Exist in Pallet");
+                                  Fluttertoast.showToast(msg: "SKU Already Exist in Pallet");
                                   setState(() {
                                     selectedSKU = null;
                                     selectedVariant = null;
@@ -558,8 +525,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                             progressDialog.show();
                             if (palletDetails?.data?.id != null) {
                               await _webservices
-                                  .updatePallet(body,
-                                      palletDetails?.data?.id?.toInt() ?? -1)
+                                  .updatePallet(body, palletDetails?.data?.id?.toInt() ?? -1)
                                   .then((value) {
                                 progressDialog.dismiss();
                                 if (value) {
@@ -567,9 +533,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                                 }
                               });
                             } else {
-                              await _webservices
-                                  .storePallet(body)
-                                  .then((value) {
+                              await _webservices.storePallet(body).then((value) {
                                 progressDialog.dismiss();
                                 if (value) {
                                   Get.back();
@@ -704,8 +668,7 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         pallet: pallet,
                       ));
                   if (tempPallet != null) {
-                    String formattedDateActual =
-                        DateFormat('yyyy-MM-dd').format(selectedDate);
+                    String formattedDateActual = DateFormat('yyyy-MM-dd').format(selectedDate);
                     pallet = tempPallet;
                     listPallets[index] = tempPallet;
                     pList[index] = {
@@ -759,27 +722,21 @@ class _IncreaseCapacityScreenState extends State<IncreaseCapacityScreen> {
                         Text(
                           "Delete?",
                           style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18.0.sp,
-                              fontWeight: FontWeight.bold),
+                              color: Colors.black, fontSize: 18.0.sp, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Sku ID: ${pallet?.skuCodeName}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 17.0.sp,
-                              fontWeight: FontWeight.w400),
+                              color: Colors.black, fontSize: 17.0.sp, fontWeight: FontWeight.w400),
                         ),
                       ],
                     ),
                     btnCancelOnPress: () {},
                     btnOkOnPress: () {
-                      pList.removeWhere((element) =>
-                          element["sku_code_id"] == pallet?.skuCodeId);
+                      pList.removeWhere((element) => element["sku_code_id"] == pallet?.skuCodeId);
                       listPallets.remove(pallet);
-                      totalWeight =
-                          totalWeight - num.parse(pallet?.weight ?? "0.0");
+                      totalWeight = totalWeight - num.parse(pallet?.weight ?? "0.0");
                       setState(() {});
                     },
                   ).show();
